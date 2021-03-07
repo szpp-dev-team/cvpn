@@ -1,0 +1,43 @@
+{
+    "name": "szpp-go-dev",
+
+    "build": {
+        "dockerfile": "Dockerfile",
+    },
+
+    // 拡張機能
+    "extensions": [
+        "golang.go", // go language server
+        "mosapride.zenkaku", // 全角スペースが「「「見える化」」」される
+        // "vscodevim.vim", // vim 拡張(使いたい人だけ)
+    ],
+
+    // go の設定
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+
+        "go.useLanguageServer": true,
+        "[go]": {
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true,
+            },
+            "editor.snippetSuggestions": "none",
+        },
+        "[go.mod]": {
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true,
+            },
+        },
+        "gopls": {
+            "usePlaceholders": true,
+            "staticcheck": false,
+        },
+        "go.lintTool": "golangci-lint",
+    },
+
+    "remoteUser": "vscode",
+    "containerUser": "vscode",
+    "updateRemoteUserUID": true,
+}
