@@ -19,3 +19,22 @@ $ go run ./cmd/cvpn/main.go
 2. `cvpn-go/` ディレクトリを VScode で開き、左下の青いボタンをクリックし、`Remote-Containers: Reopen in Container` を選択する。※ここで環境がホストからコンテナ上に切り替わるので注意。  
 3. コマンドパレットを開いて `Go: Install/Update Tools` と入力して、全てのツールをチェックしてインストールする。    
 4. (任意) git の ssh 設定？
+
+### ディレクトリ構成
+```console
+cmd/
+  └ cvpn
+      └ main.go     # エントリーポイント(main 関数だけ)
+  
+api/
+  ├ common.go       # api の共通部分(構造体とかリクエストとか)
+  ├ auth.go         # auth api
+  ├ download.go     # download api
+  └ list.go         # list api
+
+pkg/
+  ├ config/         # config 関係
+  |   └ config.go   
+  └ util/           # ユーティリティ(入力とか)
+      └ input.go
+```
