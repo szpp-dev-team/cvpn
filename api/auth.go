@@ -10,9 +10,9 @@ import (
 
 func (self *Client) Login(username string, password string) error {
 	const (
-		LoginPayload = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
-		LoginFailed  = "/dana-na/auth/url_3/welcome.cgi?p=failed"
-		LoginSucceed = "/dana/home/index.cgi"
+		LoginEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
+		LoginFailed   = "/dana-na/auth/url_3/welcome.cgi?p=failed"
+		LoginSucceed  = "/dana/home/index.cgi"
 	)
 
 	parms := map[string][]string{
@@ -23,7 +23,7 @@ func (self *Client) Login(username string, password string) error {
 		"btnSubmit": {"Sign+In"},
 	}
 
-	resp, err := self.client.PostForm(LoginPayload, parms)
+	resp, err := self.client.PostForm(LoginEndpoint, parms)
 	if err != nil {
 		return err
 	}
@@ -46,9 +46,9 @@ func (self *Client) Login(username string, password string) error {
 }
 
 func (self *Client) Logout() error {
-	const LogoutPayload = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/logout.cgi"
+	const LogoutEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/logout.cgi"
 
-	req, err := http.NewRequest(http.MethodGet, LogoutPayload, nil)
+	req, err := http.NewRequest(http.MethodGet, LogoutEndpoint, nil)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (self *Client) Logout() error {
 	if resp.StatusCode != http.StatusOK {
 		return errors.New("failed to logout")
 	}
-	
+
 	return nil
 }
 
