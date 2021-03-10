@@ -7,11 +7,15 @@ import (
 	"strings"
 )
 
-const VpnHostRoot = "https://vpn.inf.shizuoka.ac.jp"
+const (
+	VpnHostRoot = "https://vpn.inf.shizuoka.ac.jp"
+	VpnIndexURL = "https://vpn.inf.shizuoka.ac.jp/dana/home/index.cgi"
+)
 
 type Client struct {
-	client  *http.Client
-	cookies []string
+	client     *http.Client
+	cookies    []string
+	authParams map[string][]string
 }
 
 func NewClient() *Client {
