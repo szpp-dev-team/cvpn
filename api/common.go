@@ -28,11 +28,11 @@ func NewClient() *Client {
 }
 
 // need cookies
-func (self *Client) request(r *http.Request) (*http.Response, error) {
+func (c *Client) request(r *http.Request) (*http.Response, error) {
 	r.Header = map[string][]string{
-		"cookie": {strings.Join(self.cookies, "; ")}}
+		"cookie": {strings.Join(c.cookies, "; ")}}
 
-	resp, err := self.client.Do(r)
+	resp, err := c.client.Do(r)
 
 	return resp, err
 }

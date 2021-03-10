@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (self *Client) Login(username string, password string) error {
+func (c *Client) Login(username string, password string) error {
 	const (
 		LoginEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
 		LoginFailed   = "/dana-na/auth/url_3/welcome.cgi?p=failed"
@@ -23,7 +23,7 @@ func (self *Client) Login(username string, password string) error {
 		"btnSubmit": {"Sign+In"},
 	}
 
-	resp, err := self.client.PostForm(LoginEndpoint, parms)
+	resp, err := c.client.PostForm(LoginEndpoint, parms)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (self *Client) Login(username string, password string) error {
 	switch location {
 	case LoginSucceed:
 		// Header は map[string][]string の拡張
-		self.cookies = getCookies(resp.Header["Set-Cookie"])
+		c.cookies = getCookies(resp.Header["Set-Cookie"])
 	case LoginFailed:
 		return errors.New("Error: Login Failed")
 	default: // confirm session
@@ -45,7 +45,7 @@ func (self *Client) Login(username string, password string) error {
 	return nil
 }
 
-func (self *Client) Logout() error {
+func (c *Client) Logout() error {
 	const LogoutEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/logout.cgi"
 
 	req, err := http.NewRequest(http.MethodGet, LogoutEndpoint, nil)
@@ -53,7 +53,7 @@ func (self *Client) Logout() error {
 		return err
 	}
 
-	resp, err := self.request(req)
+	resp, err := c.request(req)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (self *Client) Logout() error {
 		return errors.New("failed to logout")
 	}
 
-	self.cookies = getCookies(resp.Header["Set-Cookie"])
+	c.cookies = getCookies(resp.Header["Set-Cookie"])
 	location := resp.Header.Get("location")
 
 	req, err = http.NewRequest(http.MethodGet, VpnHostRoot+location, nil)
@@ -69,7 +69,7 @@ func (self *Client) Logout() error {
 		return err
 	}
 
-	resp, err = self.request(req)
+	resp, err = c.request(req)
 	if err != nil {
 		return err
 	}
