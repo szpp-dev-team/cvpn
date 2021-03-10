@@ -6,9 +6,24 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 func (c *Client) Login(username string, password string) error {
+	if err := c.login(username, password); err != nil {
+		return err
+	}
+
+	_, err := c.getAuthParms()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) login(username, password string) error {
 	const (
 		LoginEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
 		LoginFailed   = "/dana-na/auth/url_3/welcome.cgi?p=failed"
@@ -27,6 +42,7 @@ func (c *Client) Login(username string, password string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusFound {
 		return errors.New("Error: Please logout and login")
 	}
@@ -34,7 +50,6 @@ func (c *Client) Login(username string, password string) error {
 	location := resp.Header.Get("location")
 	switch location {
 	case LoginSucceed:
-		// Header は map[string][]string の拡張
 		c.cookies = getCookies(resp.Header["Set-Cookie"])
 	case LoginFailed:
 		return errors.New("Error: Login Failed")
@@ -43,6 +58,37 @@ func (c *Client) Login(username string, password string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) getAuthParms() (map[string][]string, error) {
+	req, err := http.NewRequest(http.MethodGet, VpnIndexURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.request(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Error: Status code was not OK")
+	}
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	xsauth, err := findXsauth(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	params := map[string][]string{
+		"xsauth":  {xsauth},
+	}
+
+	return params, nil
 }
 
 func (c *Client) Logout() error {
@@ -88,4 +134,22 @@ func getCookies(cookies []string) []string {
 	}
 
 	return parsedCookies
+}
+
+func findXsauth(doc *goquery.Document) (string, error) {
+	selection := doc.Find(`
+		body >
+		table#table_useruimenu_10.tdContent >
+		tr >
+		td >
+		form#expandForm >
+		input#xsauth_395
+	`)
+
+	val, exists := selection.Attr("value")
+	if !exists {
+		return "", errors.New("Error: xsauth not found")
+	}
+
+	return val, nil
 }
