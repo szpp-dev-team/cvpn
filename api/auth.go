@@ -5,6 +5,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -93,6 +94,30 @@ func (c *Client) getAuthParms() (map[string][]string, error) {
 	}
 
 	return params, nil
+}
+
+func (c *Client) LoadCookiesOrLogin(username, password string) error {
+	cookies, err := loadCookies()
+	if err != nil || len(cookies) == 0 {
+		log.Println("LoadCookiesOrLogin(): Trying login due to no cookie.")
+		return c.Login(username, password)
+	}
+	c.cookies = cookies
+
+	// ファイルから読み込んだクッキーで getAuthParms() が成功したなら return
+	_, err = c.getAuthParms()
+	if err == nil {
+		log.Println("LoadCookiesOrLogin(): Succeeded getAuthParms() with saved cookie.")
+		return nil
+	}
+
+	switch err.(type) {
+	case *ErrRedirectedToLogin:
+		log.Println("LoadCookiesOrLogin(): Trying login due to invalid cookie.")
+		return c.Login(username, password)
+	default:
+		return err
+	}
 }
 
 func (c *Client) Logout() error {
