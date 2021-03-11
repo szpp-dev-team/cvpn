@@ -4,6 +4,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -85,7 +86,7 @@ func (c *Client) getAuthParms() (map[string][]string, error) {
 	}
 
 	params := map[string][]string{
-		"xsauth":  {xsauth},
+		"xsauth": {xsauth},
 	}
 
 	return params, nil
@@ -138,11 +139,13 @@ func getCookies(cookies []string) []string {
 
 func findXsauth(doc *goquery.Document) (string, error) {
 	selection := doc.Find(`
+		html >
 		body >
 		table#table_useruimenu_10.tdContent >
+		tbody > 
 		tr >
 		td >
-		form#expandForm >
+		form#expandForm > 
 		input#xsauth_395
 	`)
 
@@ -150,6 +153,8 @@ func findXsauth(doc *goquery.Document) (string, error) {
 	if !exists {
 		return "", errors.New("Error: xsauth not found")
 	}
+
+	fmt.Println(val)
 
 	return val, nil
 }
