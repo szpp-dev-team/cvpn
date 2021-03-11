@@ -3,6 +3,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 )
@@ -33,6 +34,10 @@ func NewClient() *Client {
 
 // need cookies
 func (c *Client) request(r *http.Request) (*http.Response, error) {
+	if len(c.cookies) == 0 {
+		return nil, errors.New("Error: please login")
+	}
+
 	r.Header = map[string][]string{
 		"cookie": {strings.Join(c.cookies, "; ")}}
 
