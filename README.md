@@ -4,8 +4,8 @@
 1. `.env` に認証情報を入力する。入力処理が完成したらこれは削除して ok  
 ```console
 $ echo '
-VPN_USERNAME=your_username
-VPN_PASSWORD=your_password' > .env
+SVPN_USERNAME=your_username
+SVPN_PASSWORD=your_password' > .env
 ```
 2. 実行する
 ```console
