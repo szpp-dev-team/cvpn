@@ -142,10 +142,10 @@ func findXsauth(doc *goquery.Document) (string, error) {
 		html >
 		body >
 		table#table_useruimenu_10.tdContent >
-		tbody > 
+		tbody >
 		tr >
 		td >
-		form#expandForm > 
+		form#expandForm >
 		input#xsauth_395
 	`)
 
