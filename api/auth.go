@@ -72,6 +72,9 @@ func (c *Client) getAuthParms() (map[string][]string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if isRedirectedToLogin(resp) {
+			return nil, &ErrRedirectedToLogin{NextPath: resp.Header.Get("location"), PrevPath: req.URL.RawPath}
+		}
 		return nil, errors.New("Error: Status code was not OK")
 	}
 
