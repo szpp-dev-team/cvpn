@@ -22,6 +22,10 @@ func (c *Client) Login(username string, password string) error {
 		return err
 	}
 
+	if err := saveCookies(c.cookies); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -152,6 +156,7 @@ func (c *Client) Logout() error {
 		return errors.New("failed to logout")
 	}
 
+	_ = deleteCookieFile()
 	return nil
 }
 
