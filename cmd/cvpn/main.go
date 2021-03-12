@@ -24,6 +24,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := client.UploadFile("test.txt", "/path/to/dir(report)"); err != nil {
+		log.Fatal(err)
+	}
+
 	// if err := client.Logout(); err != nil {
 	// 	log.Fatal(err)
 	// }
