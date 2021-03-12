@@ -18,9 +18,9 @@ func configDirPath() (string, error) {
 	return path.Join(configDir, "cvpn"), nil
 }
 
-// ChacheDirPath は cvpn のキャッシュデータを格納するユーザディレクトリの絶対パスを返す。
+// cacheDirPath は cvpn のキャッシュデータを格納するユーザディレクトリの絶対パスを返す。
 // Linux ならおそらく一般的に ~/.cache 。
-func chacheDirPath() (string, error) {
+func cacheDirPath() (string, error) {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
@@ -30,7 +30,7 @@ func chacheDirPath() (string, error) {
 
 // cookieCacheFilePath はクッキーを保存するファイルの絶対パスを返す。
 func cookieFilePath() (string, error) {
-	cacheDir, err := chacheDirPath()
+	cacheDir, err := cacheDirPath()
 	if err != nil {
 		return "", err
 	}
@@ -39,7 +39,7 @@ func cookieFilePath() (string, error) {
 
 // saveCookies は cookies を cookieFilePath() で示されるパスのファイルへ書き込む。
 // ファイルはまず空になったあとで書き込まれる。
-// 保存形式や保存先ファイル名は規定しない。読み出しは leadCookies を用いること。
+// 保存形式や保存先ファイル名は規定しない。読み出しは loadCookies を用いること。
 func saveCookies(cookies []string) error {
 	cookieFilePath, err := cookieFilePath()
 	if err != nil {

@@ -17,7 +17,7 @@ func (c *Client) Login(username string, password string) error {
 		return err
 	}
 
-	_, err := c.getAuthParms()
+	_, err := c.getAuthParams()
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (c *Client) login(username, password string) error {
 	return nil
 }
 
-func (c *Client) getAuthParms() (map[string][]string, error) {
+func (c *Client) getAuthParams() (map[string][]string, error) {
 	req, err := http.NewRequest(http.MethodGet, VpnIndexURL, nil)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (c *Client) LoadCookiesOrLogin(username, password string) error {
 	c.cookies = cookies
 
 	// ファイルから読み込んだクッキーで getAuthParms() が成功したなら return
-	_, err = c.getAuthParms()
+	_, err = c.getAuthParams()
 	if err == nil {
 		log.Println("LoadCookiesOrLogin(): Succeeded getAuthParms() with saved cookie.")
 		return nil
