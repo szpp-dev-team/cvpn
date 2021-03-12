@@ -67,23 +67,19 @@ func (c *Client) login(username, password string) error {
 }
 
 func (c *Client) getAuthParams() (map[string][]string, error) {
-	req, err := http.NewRequest(http.MethodGet, VpnIndexURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := c.request(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		if isRedirectedToLogin(resp) {
-			return nil, &ErrRedirectedToLogin{NextPath: resp.Header.Get("location"), PrevPath: req.URL.RawPath}
-		}
-		return nil, errors.New("Error: Status code was not OK")
-	}
+	doc, err := c.getDoc(
+		VpnIndexURL,
+		func(req *http.Request, resp *http.Response) error {
+			if resp.StatusCode != http.StatusOK {
+				if isRedirectedToLogin(resp) {
+					return &ErrRedirectedToLogin{NextPath: resp.Header.Get("location"), PrevPath: req.URL.RawPath}
+				}
+				return errors.New("Error: Status code was not OK")
+			}
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+			return nil
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -143,15 +139,12 @@ func (c *Client) Logout() error {
 	c.cookies = getCookies(resp.Header["Set-Cookie"])
 	location := resp.Header.Get("location")
 
-	req, err = http.NewRequest(http.MethodGet, VpnHostRoot+location, nil)
-	if err != nil {
-		return err
-	}
-
+	req, _ = http.NewRequest(http.MethodGet, VpnHostRoot+location, nil)
 	resp, err = c.request(req)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return errors.New("failed to logout")
 	}
@@ -187,7 +180,7 @@ func findXsauth(doc *goquery.Document) (string, error) {
 		return "", errors.New("Error: xsauth not found")
 	}
 
-	fmt.Println(val)
+	fmt.Println("xsauth: " + val)
 
 	return val, nil
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 const (
@@ -39,12 +41,46 @@ func (c *Client) request(r *http.Request) (*http.Response, error) {
 		return nil, errors.New("Error: please login")
 	}
 
-	r.Header = map[string][]string{
-		"cookie": {strings.Join(c.cookies, "; ")}}
+	r.Header.Set("cookie", strings.Join(c.cookies, "; "))
+	r.Form = mergeMap(r.Form, c.authParams)
 
-	resp, err := c.client.Do(r)
+	return c.client.Do(r)
+}
 
-	return resp, err
+// get response body and return *goquery.Document
+func (c *Client) getDoc(url string, f func(req *http.Request, resp *http.Response) error) (*goquery.Document, error) {
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	resp, err := c.request(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if f != nil {
+		if err := f(req, resp); err != nil {
+			return nil, err
+		}
+	}
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
+}
+
+func mergeMap(org, tgt map[string][]string) map[string][]string {
+	newmap := make(map[string][]string)
+
+	for k, v := range org {
+		newmap[k] = v
+	}
+	for k, v := range tgt {
+		newmap[k] = append(newmap[k], v...)
+	}
+
+	return newmap
 }
 
 type ErrRedirectedToLogin struct {
