@@ -4,6 +4,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -44,4 +45,25 @@ func (c *Client) request(r *http.Request) (*http.Response, error) {
 	resp, err := c.client.Do(r)
 
 	return resp, err
+}
+
+type ErrRedirectedToLogin struct {
+	NextPath string // リダイレクト先のURLパス
+	PrevPath string // リダイレクト元のURLパス
+}
+
+func (err *ErrRedirectedToLogin) Error() string {
+	return fmt.Sprintf("Err: Redirected to login %q (previous: %q)",
+		err.NextPath, err.PrevPath)
+}
+
+func isRedirectedToLogin(resp *http.Response) bool {
+	if resp.StatusCode != http.StatusFound {
+		return false
+	}
+	location, err := resp.Location()
+	if err != nil {
+		return false
+	}
+	return strings.Contains(location.String(), "/dana-na/auth/")
 }

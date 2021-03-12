@@ -5,6 +5,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -16,8 +17,12 @@ func (c *Client) Login(username string, password string) error {
 		return err
 	}
 
-	_, err := c.getAuthParms()
+	_, err := c.getAuthParams()
 	if err != nil {
+		return err
+	}
+
+	if err := saveCookies(c.cookies); err != nil {
 		return err
 	}
 
@@ -61,7 +66,7 @@ func (c *Client) login(username, password string) error {
 	return nil
 }
 
-func (c *Client) getAuthParms() (map[string][]string, error) {
+func (c *Client) getAuthParams() (map[string][]string, error) {
 	req, err := http.NewRequest(http.MethodGet, VpnIndexURL, nil)
 	if err != nil {
 		return nil, err
@@ -72,6 +77,9 @@ func (c *Client) getAuthParms() (map[string][]string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if isRedirectedToLogin(resp) {
+			return nil, &ErrRedirectedToLogin{NextPath: resp.Header.Get("location"), PrevPath: req.URL.RawPath}
+		}
 		return nil, errors.New("Error: Status code was not OK")
 	}
 
@@ -90,6 +98,30 @@ func (c *Client) getAuthParms() (map[string][]string, error) {
 	}
 
 	return params, nil
+}
+
+func (c *Client) LoadCookiesOrLogin(username, password string) error {
+	cookies, err := loadCookies()
+	if err != nil || len(cookies) == 0 {
+		log.Println("LoadCookiesOrLogin(): Trying login due to no cookie.")
+		return c.Login(username, password)
+	}
+	c.cookies = cookies
+
+	// ファイルから読み込んだクッキーで getAuthParms() が成功したなら return
+	_, err = c.getAuthParams()
+	if err == nil {
+		log.Println("LoadCookiesOrLogin(): Succeeded getAuthParms() with saved cookie.")
+		return nil
+	}
+
+	switch err.(type) {
+	case *ErrRedirectedToLogin:
+		log.Println("LoadCookiesOrLogin(): Trying login due to invalid cookie.")
+		return c.Login(username, password)
+	default:
+		return err
+	}
 }
 
 func (c *Client) Logout() error {
@@ -124,6 +156,7 @@ func (c *Client) Logout() error {
 		return errors.New("failed to logout")
 	}
 
+	_ = deleteCookieFile()
 	return nil
 }
 

@@ -20,7 +20,13 @@ func main() {
 	fmt.Println(username, password)
 
 	client := api.NewClient()
-	if err := client.Login(username, password); err != nil {
+	if err := client.LoadCookiesOrLogin(username, password); err != nil {
 		log.Fatal(err)
 	}
+
+	// if err := client.Logout(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	fmt.Println("All success. exit 0.")
 }
