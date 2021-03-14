@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -19,7 +20,7 @@ const (
 type Client struct {
 	client     *http.Client
 	cookies    []string
-	authParams map[string][]string
+	authParams url.Values
 }
 
 func NewClient() *Client {
