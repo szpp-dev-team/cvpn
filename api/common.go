@@ -71,6 +71,19 @@ func (c *Client) getDoc(url string, f func(req *http.Request, resp *http.Respons
 	return doc, nil
 }
 
+// ディレクトリへアクセスするための汎用的なパラメータ群を返す。
+// ファイルアップロードやディレクトリ内 ls で必要になるはず。
+func genCommonAccessParam(volumeID, dir string) *url.Values {
+	return &url.Values{
+		"t":   {"p"},
+		"v":   {volumeID},
+		"dir": {dir},
+		"si":  {},
+		"ri":  {},
+		"pi":  {},
+	}
+}
+
 func mergeMap(org, tgt map[string][]string) map[string][]string {
 	newmap := make(map[string][]string)
 
