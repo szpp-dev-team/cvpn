@@ -24,7 +24,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := client.UploadFile("test.txt", "/path/to/dir(report)"); err != nil {
+	const (
+		srcFilePath     = "./test.txt"
+		renamedFileName = "upload-rename-test.txt"
+		volumeID        = "resource_1389773645.177066.2,2020"
+		destDirPath     = "cs20XXX"
+	)
+	if err := client.UploadFile(srcFilePath, renamedFileName, volumeID, destDirPath); err != nil {
 		log.Fatal(err)
 	}
 
