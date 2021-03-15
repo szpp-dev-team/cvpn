@@ -36,7 +36,7 @@ func NewClient() *Client {
 	}
 }
 
-// need cookies
+// 認証情報を含めたリクエストを送る。
 func (c *Client) request(r *http.Request) (*http.Response, error) {
 	if len(c.cookies) == 0 {
 		return nil, errors.New("Error: please login")
