@@ -17,10 +17,11 @@ func (c *Client) Login(username string, password string) error {
 		return err
 	}
 
-	_, err := c.getAuthParams()
+	authParams, err := c.getAuthParams()
 	if err != nil {
 		return err
 	}
+	c.authParams = authParams
 
 	if err := saveCookies(c.cookies); err != nil {
 		return err
@@ -105,8 +106,9 @@ func (c *Client) LoadCookiesOrLogin(username, password string) error {
 	c.cookies = cookies
 
 	// ファイルから読み込んだクッキーで getAuthParms() が成功したなら return
-	_, err = c.getAuthParams()
+	authParams, err := c.getAuthParams()
 	if err == nil {
+		c.authParams = authParams
 		log.Println("LoadCookiesOrLogin(): Succeeded getAuthParms() with saved cookie.")
 		return nil
 	}
