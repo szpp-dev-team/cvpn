@@ -17,7 +17,7 @@ import (
 // savePath が {dir} だったらサーバー上と同名でそこに保存し、{dir}/{file} だったら {dir} 上に名前は {file} で保存する。
 // savePath の指定がなければカレントディレクトリ上に保存する。
 func (c *Client) Download(targetPath, savePath, volumeID string) error {
-	const DownloadURLFormat = "https://vpn.inf.shizuoka.ac.jp/dana/download/%s?url=/dana-cached/fb/smb/wfv.cgi?v=%s&dir=%s&file=%s"
+	const DownloadURLFormat = "https://vpn.inf.shizuoka.ac.jp/dana/download/%s?url=/dana-cached/fb/smb/wfv.cgi?t=p&v=%s&si=0&ri=0&pi=0&ignoreDfs=1&dir=%s&file=%s"
 
 	dirName, fileName := filepath.Split(targetPath)
 
