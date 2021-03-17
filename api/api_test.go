@@ -19,9 +19,9 @@ func TestDownload(t *testing.T) {
 	}
 
 	const (
-		targetPath = "/path/to/file"
+		targetPath = "/cs20097/makabe.png"
 		savePath   = ""
-		volumeID   = VolumeIDFSShare
+		volumeID   = VolumeIDFS + "2020"
 	)
 	if err := client.Download(
 		targetPath,
@@ -45,7 +45,7 @@ func TestUpload(t *testing.T) {
 	const (
 		srcFilePath     = "./../test.txt"
 		renamedFileName = "upload-rename-test.txt"
-		volumeID        = "resource_1389773645.177066.2,2020"
+		volumeID        = VolumeIDFS + ",{dir}"
 		destDirPath     = "cs200XX"
 	)
 	if err := client.UploadFile(srcFilePath, renamedFileName, volumeID, destDirPath); err != nil {
