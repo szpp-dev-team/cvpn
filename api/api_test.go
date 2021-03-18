@@ -8,6 +8,22 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func TestLogin(t *testing.T) {
+	if err := godotenv.Load("../.env"); err != nil {
+		t.Fatal(err)
+	}
+
+	client := NewClient()
+	if err := client.LoadCookiesOrLogin(os.Getenv("SVPN_USERNAME"), os.Getenv("SVPN_PASSWORD")); err != nil {
+		switch err.(type) {
+		case *SessionError:
+			// セッションエラーだからセッションを選ばせればいい
+		default:
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestDownload(t *testing.T) {
 	if err := godotenv.Load("../.env"); err != nil {
 		t.Fatal(err)

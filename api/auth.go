@@ -29,6 +29,12 @@ func (c *Client) Login(username string, password string) error {
 	return nil
 }
 
+type SessionError struct{}
+
+func (se *SessionError) Error() string {
+	return "Error: Session Error. You have to choose session"
+}
+
 func (c *Client) login(username, password string) error {
 	const (
 		LoginEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
@@ -58,7 +64,7 @@ func (c *Client) login(username, password string) error {
 	case LoginSucceed:
 		c.cookies = getCookies(resp.Header["Set-Cookie"])
 	case LoginFailed:
-		return errors.New("Error: Login Failed")
+		return &SessionError{}
 	default: // confirm session
 		return errors.New("Oops! You should choose session(todo)")
 	}
