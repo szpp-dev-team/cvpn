@@ -9,6 +9,7 @@
     "extensions": [
         "golang.go", // go language server
         "mosapride.zenkaku", // 全角スペースが「「「見える化」」」される
+        "ms-vsliveshare.vsliveshare-pack", // live share
         // "vscodevim.vim", // vim 拡張(使いたい人だけ)
     ],
 

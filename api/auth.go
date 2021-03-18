@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -153,16 +152,6 @@ func (c *Client) Logout() error {
 
 	_ = deleteCookieFile()
 	return nil
-}
-
-func getCookies(cookies []string) []string {
-	var parsedCookies []string
-	for _, line := range cookies {
-		tokens := strings.Split(line, "; ")
-		parsedCookies = append(parsedCookies, tokens[0])
-	}
-
-	return parsedCookies
 }
 
 func findXsauth(doc *goquery.Document) (string, error) {
