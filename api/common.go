@@ -17,6 +17,11 @@ const (
 	VpnIndexURL = "https://vpn.inf.shizuoka.ac.jp/dana/home/index.cgi"
 )
 
+const (
+	VolumeIDFSShare = "resource_1423533946.487706.3"
+	VolumeIDFS      = "resource_1389773645.177066.2," // resource_1389773645.177066.2,2020 とか
+)
+
 type Client struct {
 	client     *http.Client
 	cookies    []string
@@ -45,7 +50,15 @@ func (c *Client) request(r *http.Request) (*http.Response, error) {
 	r.Header.Set("cookie", strings.Join(c.cookies, "; "))
 	r.Form = mergeMap(r.Form, c.authParams)
 
-	return c.client.Do(r)
+	resp, err := c.client.Do(r)
+	if err != nil {
+		return nil, err
+	}
+
+	cookies := getCookies(resp.Header["Set-Cookie"])
+	c.cookies = append(c.cookies, cookies...)
+
+	return resp, nil
 }
 
 // get response body and return *goquery.Document
@@ -82,6 +95,16 @@ func genCommonAccessParam(volumeID, dir string) *url.Values {
 		"ri":  {},
 		"pi":  {},
 	}
+}
+
+func getCookies(cookies []string) []string {
+	var parsedCookies []string
+	for _, line := range cookies {
+		tokens := strings.Split(line, "; ")
+		parsedCookies = append(parsedCookies, tokens[0])
+	}
+
+	return parsedCookies
 }
 
 func mergeMap(org, tgt map[string][]string) map[string][]string {
