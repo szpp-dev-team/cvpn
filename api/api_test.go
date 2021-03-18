@@ -18,6 +18,9 @@ func TestLogin(t *testing.T) {
 		switch err.(type) {
 		case *SessionError:
 			// セッションエラーだからセッションを選ばせればいい
+			if err := client.ConfirmSession(true); err != nil {
+				t.Fatal(err)
+			}
 		default:
 			t.Fatal(err)
 		}

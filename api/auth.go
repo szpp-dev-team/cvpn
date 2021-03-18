@@ -12,7 +12,15 @@ import (
 )
 
 func (c *Client) Login(username string, password string) error {
-	if err := c.login(username, password); err != nil {
+	parms := map[string][]string{
+		"tz_offset": {"540"},
+		"username":  {username},
+		"password":  {password},
+		"realm":     {"Student-Realm"},
+		"btnSubmit": {"Sign+In"},
+	}
+
+	if err := c.login(parms); err != nil {
 		return err
 	}
 
@@ -29,26 +37,20 @@ func (c *Client) Login(username string, password string) error {
 	return nil
 }
 
-type SessionError struct{}
+type SessionError struct {
+	requestURL string
+}
 
 func (se *SessionError) Error() string {
 	return "Error: Session Error. You have to choose session"
 }
 
-func (c *Client) login(username, password string) error {
+func (c *Client) login(parms map[string][]string) error {
 	const (
 		LoginEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
 		LoginFailed   = "/dana-na/auth/url_3/welcome.cgi?p=failed"
 		LoginSucceed  = "/dana/home/index.cgi"
 	)
-
-	parms := map[string][]string{
-		"tz_offset": {"540"},
-		"username":  {username},
-		"password":  {password},
-		"realm":     {"Student-Realm"},
-		"btnSubmit": {"Sign+In"},
-	}
 
 	resp, err := c.client.PostForm(LoginEndpoint, parms)
 	if err != nil {
@@ -64,9 +66,10 @@ func (c *Client) login(username, password string) error {
 	case LoginSucceed:
 		c.cookies = getCookies(resp.Header["Set-Cookie"])
 	case LoginFailed:
-		return &SessionError{}
-	default: // confirm session
-		return errors.New("Oops! You should choose session(todo)")
+		return errors.New("Error: Login Failed")
+	default:
+		fmt.Println(location)
+		return &SessionError{requestURL: location}
 	}
 
 	return nil
@@ -158,6 +161,66 @@ func (c *Client) Logout() error {
 
 	_ = deleteCookieFile()
 	return nil
+}
+
+// if ok == true, continue to login on current device.
+// else, stop to login.
+func (c *Client) ConfirmSession(ok bool) error {
+	const (
+		ConfirmEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/welcome.cgi?p=user%2Dconfirm"
+		ContinueLogin   = "セッションを続行します"
+		StopLogin       = "キャンセル"
+	)
+
+	doc, err := c.getDoc(
+		ConfirmEndpoint,
+		func(req *http.Request, resp *http.Response) error {
+			if resp.StatusCode != http.StatusOK {
+				return errors.New("Error: not ok")
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	formDataStr, err := findFormDataStr(doc)
+	if err != nil {
+		return err
+	}
+
+	params := func() map[string][]string {
+		if ok {
+			return map[string][]string{
+				"btnContinue": {ContinueLogin},
+			}
+		}
+		return map[string][]string{
+			"btnCancel": {StopLogin},
+		}
+	}()
+	params["FormDataStr"] = []string{formDataStr}
+
+	return c.login(params)
+}
+
+func findFormDataStr(doc *goquery.Document) (string, error) {
+	selection := doc.Find(`
+		html >
+		body
+	`)
+	html, _ := selection.Html()
+	fmt.Println(html)
+
+	formDataStr, exists := selection.Attr("value")
+	if !exists {
+		return "", errors.New("Value FormDataStr not exists")
+	}
+
+	fmt.Println("FormDataStr:", formDataStr)
+
+	return formDataStr, nil
 }
 
 func findXsauth(doc *goquery.Document) (string, error) {
