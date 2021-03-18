@@ -143,7 +143,6 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 			}
 		}
 		urls = append(urls, tokens_seg)
-		fmt.Println(tokens_seg)
 	}
 
 	return urls, nil
