@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -17,7 +19,8 @@ type SegmentInfo struct {
 	Path      string // ファイルならダウンロード URL、ディレクトリなら移動先の URL
 	IsFile    bool   // 良いデザインパターンがあるはずなのであったらそれを採用してください
 	IsDir     bool
-	Size      int64  // 単位があると良い
+	Size      float64 // サイズ
+	Unit      string // サイズの単位
 	UpdatedAt string // できれば日時の構造体を使って欲しい
 }
 
@@ -71,8 +74,8 @@ func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 }
 
 // "d(...)" とか "f(...)"とかの形式で返す
-func findSegmentLines(doc *goquery.Document) ([]string, error) {
-	var urls []string
+func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
+	var urls []SegmentInfo
 
 	//要素をたどっていく
 	selection := doc.Find(`
@@ -87,12 +90,61 @@ func findSegmentLines(doc *goquery.Document) ([]string, error) {
         tbody >
         tr >
         td >
-        table#table_wfb_5 
+        table#table_wfb_5 >
         tbody >
         script
 	`)
-	html, _ := selection.Html()
-	fmt.Println(html)
+	lines := strings.Split(selection.Text(), ";\n")
+
+	first := true
+
+	for _, line := range lines {
+		if len(line) == 0 {
+			break
+		}
+		var tokens []string
+		if first {
+			tokens = strings.Split(line[3:len(line)-1], ",")
+			first = false
+		} else {
+			tokens = strings.Split(line[2:len(line)-1], ",")
+		}
+
+		var tokens_seg SegmentInfo
+
+		if len(tokens) == 3 {
+			tokens_seg = SegmentInfo{
+				Name:      tokens[0][1 : len(tokens[0])-1],
+				Path:      tokens[1][1 : len(tokens[1])-1],
+				IsFile:    false,
+				IsDir:     true,
+				Size:      -1,
+				Unit:      "",
+				UpdatedAt: tokens[2][1 : len(tokens[2])-1],
+			}
+		}
+		if len(tokens) == 4 {
+			Size_item := strings.Split(tokens[2][1:len(tokens[2])-1], "&")
+			Size_value, _ := strconv.ParseFloat(Size_item[0], 64)
+			var Size_unit string
+			if Size_item[1][len(Size_item[1])-1]=='B' {
+				Size_unit = Size_item[1][len(Size_item[1])-2:]
+			}else {
+				Size_unit = Size_item[1][len(Size_item[1])-5:]
+			}
+			tokens_seg = SegmentInfo{
+				Name:      tokens[0][1 : len(tokens[0])-1],
+				Path:      tokens[1][1 : len(tokens[1])-1],
+				IsFile:    true,
+				IsDir:     false,
+				Size:      Size_value,
+				Unit:      Size_unit,
+				UpdatedAt: tokens[3][1 : len(tokens[3])-1],
+			}
+		}
+		urls = append(urls, tokens_seg)
+		fmt.Println(tokens_seg)
+	}
 
 	return urls, nil
 }

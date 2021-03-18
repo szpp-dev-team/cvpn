@@ -1,10 +1,16 @@
 package main
 
 import (
-	"github.com/Shizuoka-Univ-dev/cvpn/pkg/subcmd"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/Shizuoka-Univ-dev/cvpn/api"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
