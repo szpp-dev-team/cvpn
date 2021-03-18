@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/Shizuoka-Univ-dev/cvpn/pkg/subcmd"
+)
+
 func main() {
-	// ここにサブコマンドとかのの処理が入る
+	subcmd.Execute()
 }
