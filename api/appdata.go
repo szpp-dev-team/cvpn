@@ -10,6 +10,7 @@ import (
 
 // ConfigDirPath は cvpn の設定データを格納するユーザディレクトリの絶対パスを返す。
 // Linux ならおそらく一般的に ~/.config 。
+/*
 func configDirPath() (string, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
@@ -17,6 +18,7 @@ func configDirPath() (string, error) {
 	}
 	return path.Join(configDir, "cvpn"), nil
 }
+*/
 
 // cacheDirPath は cvpn のキャッシュデータを格納するユーザディレクトリの絶対パスを返す。
 // Linux ならおそらく一般的に ~/.cache 。
