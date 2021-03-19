@@ -93,7 +93,7 @@ func (c *Client) getAuthParams() (url.Values, error) {
 		return nil, err
 	}
 
-	var params url.Values
+	params := make(url.Values)
 
 	params.Set("xsauth", xsauth)
 
@@ -197,7 +197,21 @@ func (c *Client) ConfirmSession(ok bool) error {
 	}()
 	params["FormDataStr"] = []string{formDataStr}
 
-	return c.login(params)
+	if err := c.login(params); err != nil {
+		return err
+	}
+
+	authParams, err := c.getAuthParams()
+	if err != nil {
+		return err
+	}
+	c.authParams = authParams
+
+	if err := saveCookies(c.cookies); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func findFormDataStr(doc *goquery.Document) (string, error) {
