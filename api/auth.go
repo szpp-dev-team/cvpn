@@ -6,20 +6,21 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 func (c *Client) Login(username string, password string) error {
-	parms := map[string][]string{
-		"tz_offset": {"540"},
-		"username":  {username},
-		"password":  {password},
-		"realm":     {"Student-Realm"},
-		"btnSubmit": {"Sign+In"},
-	}
+	var params url.Values
 
-	if err := c.login(parms); err != nil {
+	params.Set("tz_offset", "540")
+	params.Set("username", username)
+	params.Set("password", password)
+	params.Set("realm", "Student-Realm")
+	params.Set("btnSubmit", "Sign+In")
+
+	if err := c.login(params); err != nil {
 		return err
 	}
 
@@ -44,14 +45,14 @@ func (se *SessionError) Error() string {
 	return "Error: Session Error. You have to choose session"
 }
 
-func (c *Client) login(parms map[string][]string) error {
+func (c *Client) login(params url.Values) error {
 	const (
 		LoginEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/url_3/login.cgi"
 		LoginFailed   = "/dana-na/auth/url_3/welcome.cgi?p=failed"
 		LoginSucceed  = "/dana/home/index.cgi"
 	)
 
-	resp, err := c.client.PostForm(LoginEndpoint, parms)
+	resp, err := c.client.PostForm(LoginEndpoint, params)
 	if err != nil {
 		return err
 	}
@@ -69,7 +70,7 @@ func (c *Client) login(parms map[string][]string) error {
 	}
 }
 
-func (c *Client) getAuthParams() (map[string][]string, error) {
+func (c *Client) getAuthParams() (url.Values, error) {
 	doc, err := c.getDoc(
 		VpnIndexURL,
 		func(req *http.Request, resp *http.Response) error {
@@ -92,9 +93,9 @@ func (c *Client) getAuthParams() (map[string][]string, error) {
 		return nil, err
 	}
 
-	params := map[string][]string{
-		"xsauth": {xsauth},
-	}
+	var params url.Values
+
+	params.Set("xsauth", xsauth)
 
 	return params, nil
 }
@@ -107,11 +108,11 @@ func (c *Client) LoadCookiesOrLogin(username, password string) error {
 	}
 	c.cookies = cookies
 
-	// ファイルから読み込んだクッキーで getAuthParms() が成功したなら return
+	// ファイルから読み込んだクッキーで getAuthparams() が成功したなら return
 	authParams, err := c.getAuthParams()
 	if err == nil {
 		c.authParams = authParams
-		log.Println("LoadCookiesOrLogin(): Succeeded getAuthParms() with saved cookie.")
+		log.Println("LoadCookiesOrLogin(): Succeeded getAuthparams() with saved cookie.")
 		return nil
 	}
 
@@ -184,13 +185,13 @@ func (c *Client) ConfirmSession(ok bool) error {
 		return err
 	}
 
-	params := func() map[string][]string {
+	params := func() url.Values {
 		if ok {
-			return map[string][]string{
+			return url.Values{
 				"btnContinue": {ContinueLogin},
 			}
 		}
-		return map[string][]string{
+		return url.Values{
 			"btnCancel": {StopLogin},
 		}
 	}()
