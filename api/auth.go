@@ -4,7 +4,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -57,22 +56,17 @@ func (c *Client) login(parms map[string][]string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusFound {
-		return errors.New("Error: Please logout and login")
-	}
 
+	c.cookies = getCookies(resp.Header["Set-Cookie"])
 	location := resp.Header.Get("location")
 	switch location {
 	case LoginSucceed:
-		c.cookies = getCookies(resp.Header["Set-Cookie"])
+		return nil
 	case LoginFailed:
 		return errors.New("Error: Login Failed")
 	default:
-		fmt.Println(location)
 		return &SessionError{requestURL: location}
 	}
-
-	return nil
 }
 
 func (c *Client) getAuthParams() (map[string][]string, error) {
@@ -208,17 +202,17 @@ func (c *Client) ConfirmSession(ok bool) error {
 func findFormDataStr(doc *goquery.Document) (string, error) {
 	selection := doc.Find(`
 		html >
-		body
+		body >
+		form#DSIDConfirmForm >
+		input#DSIDFormDataStr
 	`)
-	html, _ := selection.Html()
-	fmt.Println(html)
 
 	formDataStr, exists := selection.Attr("value")
 	if !exists {
-		return "", errors.New("Value FormDataStr not exists")
+		return "", errors.New("Error: FormDataStr not found")
 	}
 
-	fmt.Println("FormDataStr:", formDataStr)
+	// fmt.Println("FormDataStr:", formDataStr)
 
 	return formDataStr, nil
 }
@@ -240,7 +234,7 @@ func findXsauth(doc *goquery.Document) (string, error) {
 		return "", errors.New("Error: xsauth not found")
 	}
 
-	fmt.Println("xsauth: " + val)
+	// fmt.Println("xsauth: " + val)
 
 	return val, nil
 }
