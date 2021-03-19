@@ -12,7 +12,7 @@ import (
 )
 
 func (c *Client) Login(username string, password string) error {
-	var params url.Values
+	params := make(url.Values)
 
 	params.Set("tz_offset", "540")
 	params.Set("username", username)
