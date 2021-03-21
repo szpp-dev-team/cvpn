@@ -4,7 +4,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -20,8 +19,8 @@ type SegmentInfo struct {
 	IsFile    bool   // 良いデザインパターンがあるはずなのであったらそれを採用してください
 	IsDir     bool
 	Size      float64 // サイズ
-	Unit      string // サイズの単位
-	UpdatedAt string // できれば日時の構造体を使って欲しい
+	Unit      string  // サイズの単位
+	UpdatedAt string  // できれば日時の構造体を使って欲しい
 }
 
 // セグメント情報の構造体のスライスを返す
@@ -79,24 +78,24 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 
 	//要素をたどっていく
 	selection := doc.Find(`
-		html >
-		body >
-        table#table_useruimenu_10.tdContent >
-        tbody >
-		tr >
-		td >
-		form#theForm_3 >
-        table#table_wfb_3 >
-        tbody >
-        tr >
-        td >
-        table#table_wfb_5 >
-        tbody >
-        script
+	html >
+	body >
+    table#table_useruimenu_10.tdContent >
+    tbody >
+	tr >
+	td >
+	form#theForm_3 >
+    table#table_wfb_3 >
+    tbody >
+    tr >
+    td >
+    table#table_wfb_5 >
+    tbody >
+    script
 	`)
 	lines := strings.Split(selection.Text(), ";\n")
 
-	first := true
+	first := true // なぜか最初の行だけ挙動がおかしいのでその修正
 
 	for _, line := range lines {
 		if len(line) == 0 {
@@ -112,7 +111,7 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 
 		var tokens_seg SegmentInfo
 
-		if len(tokens) == 3 {
+		if len(tokens) == 3 { //ファイルの場合は要素数が3
 			tokens_seg = SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
 				Path:      tokens[1][1 : len(tokens[1])-1],
@@ -123,13 +122,13 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 				UpdatedAt: tokens[2][1 : len(tokens[2])-1],
 			}
 		}
-		if len(tokens) == 4 {
+		if len(tokens) == 4 { //ファイルの場合は要素数が4
 			Size_item := strings.Split(tokens[2][1:len(tokens[2])-1], "&")
 			Size_value, _ := strconv.ParseFloat(Size_item[0], 64)
 			var Size_unit string
-			if Size_item[1][len(Size_item[1])-1]=='B' {
+			if Size_item[1][len(Size_item[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
 				Size_unit = Size_item[1][len(Size_item[1])-2:]
-			}else {
+			} else {  //そうじゃない場合はbytes
 				Size_unit = Size_item[1][len(Size_item[1])-5:]
 			}
 			tokens_seg = SegmentInfo{
