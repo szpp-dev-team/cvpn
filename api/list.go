@@ -75,7 +75,7 @@ func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 
 // "d(...)" とか "f(...)"とかの形式で返す
 func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
-	var lowerCamelCase []SegmentInfo
+	var segmentInfos []SegmentInfo
 
 	//要素をたどっていく
 	selection := doc.Find("table#table_wfb_5 > tbody > script")
@@ -89,10 +89,10 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 
 		tokens := strings.Split(line[2:len(line)-1], ",")
 
-		var tokens_seg SegmentInfo
+		var tokensSeg SegmentInfo
 
-		if len(tokens) == 3 { //ファイルの場合は要素数が3
-			tokens_seg = SegmentInfo{
+		if len(tokens) == 3 { //ディレクトリの場合は要素数が3
+			tokensSeg = SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
 				Path:      tokens[1][1 : len(tokens[1])-1],
 				IsFile:    false,
@@ -103,31 +103,31 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 			}
 		}
 		if len(tokens) == 4 { //ファイルの場合は要素数が4
-			size_item := strings.Split(tokens[2][1:len(tokens[2])-1], "&")
-			size_value, err := strconv.ParseFloat(size_item[0], 64)
+			sizeItem := strings.Split(tokens[2][1:len(tokens[2])-1], "&")
+			sizeValue, err := strconv.ParseFloat(sizeItem[0], 64)
 			if err != nil {
 				return nil, err
 			}
 			var Size_unit string
-			if size_item[1][len(size_item[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
-				Size_unit = size_item[1][len(size_item[1])-2:]
+			if sizeItem[1][len(sizeItem[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
+				Size_unit = sizeItem[1][len(sizeItem[1])-2:]
 			} else { //そうじゃない場合はbytes
-				Size_unit = size_item[1][len(size_item[1])-5:]
+				Size_unit = sizeItem[1][len(sizeItem[1])-5:]
 			}
-			tokens_seg = SegmentInfo{
+			tokensSeg = SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
 				Path:      tokens[1][1 : len(tokens[1])-1],
 				IsFile:    true,
 				IsDir:     false,
-				Size:      size_value,
+				Size:      sizeValue,
 				Unit:      Size_unit,
 				UpdatedAt: tokens[3][1 : len(tokens[3])-1],
 			}
 		}
-		fmt.Println(tokens_seg)
+		fmt.Println(tokensSeg)
 
-		lowerCamelCase = append(lowerCamelCase, tokens_seg)
+		segmentInfos = append(segmentInfos, tokensSeg)
 	}
 
-	return lowerCamelCase, nil
+	return segmentInfos, nil
 }
