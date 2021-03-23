@@ -4,7 +4,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -124,7 +123,6 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 				UpdatedAt: tokens[3][1 : len(tokens[3])-1],
 			}
 		}
-		fmt.Println(tokensSeg)
 
 		segmentInfos = append(segmentInfos, tokensSeg)
 	}
