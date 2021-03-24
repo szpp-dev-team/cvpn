@@ -14,8 +14,8 @@ import (
 
 //JSON用の構造体
 type Config struct {
-    Username  string `json:"username"`
-    Password  string `json:"password"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
 }
 
 func NewLoginCmd() *cobra.Command {
@@ -60,7 +60,7 @@ func NewLoginCmd() *cobra.Command {
 			}else{
 				
 				// 生成確認
-				if flag,err := util.InputYN("Creating configFile? [Y/n] >> "); flag == true && err==nil {
+				if flag,err := util.InputYN("Creating configFile? [Y/n] >> "); flag && err==nil {
 
 					if err := os.MkdirAll(path.Dir(configFilePath), 0700); err != nil {
 						log.Fatal(err)
@@ -80,7 +80,11 @@ func NewLoginCmd() *cobra.Command {
 					}
 					
 					bytes, _ := json.Marshal(&data)
-					fp.WriteString(string(bytes))
+					
+					_,err = fp.WriteString(string(bytes))
+					if err != nil {
+						log.Fatal(err)
+					}
 
 					// ファイル生成（更新）ログ
 					log.Printf("Created configFile into %q.\n",configFilePath)
