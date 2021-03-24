@@ -27,6 +27,7 @@ type SegmentInfo struct {
 func (c *Client) List(path string) ([]SegmentInfo, error) {
 	req, err := http.NewRequest(
 		http.MethodGet,
+		// TODO: ここを path にする
 		"https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wfb.cgi?t=p&v=resource_1423533946.487706.3&si=0&ri=0&pi=0&sb=name&so=asc&dir=report",
 		nil,
 	)
