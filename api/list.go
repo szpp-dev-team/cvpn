@@ -62,7 +62,7 @@ func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 		return nil, err
 	}
 
-	_, err = findSegmentLines(doc)
+	segmentInfos, err = findSegmentLines(doc)
 	if err != nil {
 		return nil, err
 	}
@@ -107,11 +107,11 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 			if err != nil {
 				return nil, err
 			}
-			var Size_unit string
+			var sizeUnit string
 			if sizeItem[1][len(sizeItem[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
-				Size_unit = sizeItem[1][len(sizeItem[1])-2:]
+				sizeUnit = sizeItem[1][len(sizeItem[1])-2:]
 			} else { //そうじゃない場合はbytes
-				Size_unit = sizeItem[1][len(sizeItem[1])-5:]
+				sizeUnit = sizeItem[1][len(sizeItem[1])-5:]
 			}
 			tokensSeg = SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
@@ -119,7 +119,7 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 				IsFile:    true,
 				IsDir:     false,
 				Size:      sizeValue,
-				Unit:      Size_unit,
+				Unit:      sizeUnit,
 				UpdatedAt: tokens[3][1 : len(tokens[3])-1],
 			}
 		}
