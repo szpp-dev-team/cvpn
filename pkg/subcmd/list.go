@@ -37,17 +37,19 @@ func NewListCmd() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			/*segInfos, err := client.List(args[0])
+			segInfos, err := client.List(args[0])
 			if err != nil {
 				log.Fatal(err)
-			}*/
+			}
 
-			fmt.Print("intdex", "	", "|", "name", "															", "|", "size", "	", "|", "upload-at\n")
-			fmt.Println("----------------------------------------------------------------------------------------------------------------------------------------------------")
+			s := ""
 
-			/*for i := 0; i < len(segInfos); i++ {
-				fmt.Println(segInfos[i].Name, " " , )
-			}*/
+			fmt.Printf("index %4s |name %115s |size %4s |upload-at %4s\n", s, s, s, s)
+			fmt.Println("ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー")
+
+			for i := 0; i < len(segInfos); i++ {
+				fmt.Printf("%-11d|%-121s|%f\n", i+1, segInfos[i].Name, segInfos[i].Size)
+			}
 		},
 	}
 
