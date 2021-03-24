@@ -1,7 +1,7 @@
 package api
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"testing"
 
@@ -49,6 +49,28 @@ func TestUpload(t *testing.T) {
 		destDirPath     = "cs200XX"
 	)
 	if err := client.UploadFile(srcFilePath, renamedFileName, volumeID, destDirPath); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
+}
+
+func TestList(t *testing.T) {
+	if err := godotenv.Load("../.env"); err != nil {
+		t.Fatal(err)
+	}
+
+	client := NewClient()
+	if err := client.LoadCookiesOrLogin(os.Getenv("SVPN_USERNAME"), os.Getenv("SVPN_PASSWORD")); err != nil {
+		t.Fatal(err)
+	}
+
+	const (
+		path = "/report"
+		// volumeID = VolumeIDFSShare
+	)
+	segmentInfos, err := client.List(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(segmentInfos)
 }
