@@ -1,26 +1,104 @@
 # cvpn-go
-## Development
-### 実行方法など
-1. `.env` に認証情報を入力する。入力処理が完成したらこれは削除して ok  
+
+ `cvpn` は静岡大学情報学部 VPN サービスのコマンドラインアプリケーションです。VPN サービスをコマンドラインを通じて利用することができます。
+
+## Documentation
+
+### Installation
+
+1. [release ページ](https://github.com/szpp-dev-team/cvpn/releases) から適切なファイルをダウンロードし、展開してください。  
+
+2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `$HOME/cvpn/bin` です。
+
+#### Windows
+
+TODO
+
+#### Linux
+
 ```console
-$ echo '
-SVPN_USERNAME=your_username
-SVPN_PASSWORD=your_password' > .env
-```
-2. 実行する
-```console
-$ go run ./cmd/cvpn/main.go
+$ ls
+cvpn_linux_amd64 があることを確認
+
+$ mkdir -p $HOME/cvpn/bin
+$ cp cvpn_linux_amd64 $HOME/cvpn/bin/cvpn
+$ echo 'export PATH="$PATH:$HOME/cvpn/bin"' >> $HOME/.profile
+$ source $HOME/.profile
 ```
 
-### 開発環境
-　docker のおかげで go のインストールも vscode の拡張機能のインストールもしないで開発環境を一発で作ることができます。  
-　docker のありがたみを知る & 原因不明のバグ等を防ぐため、原則としてこのコンテナ上で開発してください。  
+#### MacOS
+
+```console
+$ ls
+cvpn_darwin_amd64 があることを確認
+
+$ mkdir -p $HOME/cvpn/bin
+$ cp cvpn_darwin_amd64 $HOME/cvpn/bin/cvpn
+$ echo 'export PATH="$PATH:$HOME/cvpn/bin"' >> $HOME/.profile
+$ source $HOME/.profile
+```
+
+### Usage
+
+#### Login
+
+```console
+$ cvpn login
+
+example
+$ cvpn login
+```
+
+#### List
+
+```console
+$ cvpn ls
+
+example
+$ cvpn ls
+```
+
+#### Download
+
+```console
+$ cvpn download {target_file_path} -o {save_path} -v {volume}
+
+example
+$ cvpn download /report/hoge.txt
+```
+
+`{volume}` 上の `{target_path}` をダウンロードし、 `{save_path}` に保存します。  
+オプションの指定がない場合、`{target_path}` はカレントディレクトリ、`{volume}` は `FSshare` がデフォルト値として設定されます。
+
+#### Upload
+
+現在開発中です。
+
+```console
+$ cvpn upload
+
+example
+$ cvpn upload
+```
+
+### Development
+
+原則として devcontainer 上で開発してください。
+
+#### Requirements
+
++ [Docker](https://www.docker.com/get-started)
++ [VScode](https://code.visualstudio.com/download)
+
+#### Steps
+
 1. VScode の拡張機能 `Remote Development` をインストールする。  
 2. `cvpn-go/` ディレクトリを VScode で開き、左下の青いボタンをクリックし、`Remote-Containers: Reopen in Container` を選択する。※ここで環境がホストからコンテナ上に切り替わるので注意。  
-3. コマンドパレットを開いて `Go: Install/Update Tools` と入力して、全てのツールをチェックしてインストールする。    
+3. コマンドパレットを開いて `Go: Install/Update Tools` と入力して、全てのツールをチェックしてインストールする。  
 4. (任意) git の ssh 設定？
 
-### ディレクトリ構成
+#### Direcotry Structure
+
 ```console
 cmd/
   └ cvpn
