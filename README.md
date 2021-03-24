@@ -97,6 +97,14 @@ $ cvpn upload
 3. コマンドパレットを開いて `Go: Install/Update Tools` と入力して、全てのツールをチェックしてインストールする。  
 4. (任意) git の ssh 設定？
 
+#### Build
+
+```console
+$ make windows
+$ make linux
+$ make darwin
+```
+
 #### Direcotry Structure
 
 ```console
