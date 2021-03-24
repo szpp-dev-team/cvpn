@@ -14,13 +14,13 @@ import (
 
 //フィールドも先頭一文字が大文字かどうかで public かどうかが決まる
 type SegmentInfo struct {
-	Name      string // ファイル or ディレクトリ の名前
-	Path      string // ファイルならダウンロード URL、ディレクトリなら移動先の URL
-	IsFile    bool   // 良いデザインパターンがあるはずなのであったらそれを採用してください
-	IsDir     bool
-	Size      float64 // サイズ
-	Unit      string  // サイズの単位
-	UpdatedAt string  // できれば日時の構造体を使って欲しい
+	Name      string  `json:"name"`       // ファイル or ディレクトリ の名前
+	Path      string  `json:"path"`       // ファイルならダウンロード URL、ディレクトリなら移動先の URL
+	IsFile    bool    `json:"is_file"`    // file であるか
+	IsDir     bool    `json:"is_dir"`     // dir であるか
+	Size      float64 `json:"size"`       // サイズ
+	Unit      string  `json:"unit"`       // サイズの単位
+	UpdatedAt string  `json:"updated_at"` // できれば日時の構造体を使って欲しい
 }
 
 // セグメント情報の構造体のスライスを返す
