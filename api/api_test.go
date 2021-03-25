@@ -39,7 +39,7 @@ func TestDownload(t *testing.T) {
 
 	const (
 		targetPath = "/cs20097/makabe.png"
-		savePath   = ""
+		savePath   = "."
 		volumeID   = VolumeIDFS + "2020"
 	)
 	if err := client.Download(
