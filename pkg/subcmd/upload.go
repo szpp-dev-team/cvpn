@@ -10,13 +10,12 @@ import (
 )
 
 func NewUploadCmd() *cobra.Command {
-	
+
 	var volumeName string
 
 	cmd := &cobra.Command{
 		Use:   "upload",
 		Short: "upload a file from path",
-		Long:  "クソナガ説明",
 
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
@@ -28,15 +27,6 @@ func NewUploadCmd() *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) { //args:コマンドライン引数
 			//go run cmd/cvpn/main.go upload aiueo -> args[0] = aiueo
-
-			// code here...
-
-			/*
-				if len(args) < 1 {
-					_ = cmd.Help()
-					os.Exit(1)
-				}
-			*/
 
 			srcPath := args[0]    //ソース
 			uploadPath := args[1] //アップロード先のURL
@@ -51,10 +41,15 @@ func NewUploadCmd() *cobra.Command {
 			}
 
 			var rename string = ""
-			/*cmd.Println("Input your upload file name")
-			fmt.Scan(&rename)*/
 
-			if err := client.UploadFile(srcPath, rename, api.VolumeIDFSShare, uploadPath); err != nil {
+			volumeID, err := api.GetVolumeIDFromName(volumeName)
+
+			if err != nil {
+				log.Fatal(err)
+				os.Exit(1)
+			}
+
+			if err := client.UploadFile(srcPath, rename, volumeID, uploadPath); err != nil {
 				log.Fatal(err)
 				os.Exit(1)
 			}
