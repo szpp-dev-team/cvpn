@@ -8,15 +8,10 @@ import (
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
 	"github.com/Shizuoka-Univ-dev/cvpn/pkg/util"
 	"encoding/json"
+	"github.com/Shizuoka-Univ-dev/cvpn/pkg/config"
 	"path"
 	
 )
-
-//JSON用の構造体
-type Config struct {
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-}
 
 func NewLoginCmd() *cobra.Command {
 	return &cobra.Command{
@@ -73,7 +68,7 @@ func NewLoginCmd() *cobra.Command {
 				defer fp.Close()
 					
 				//JSONデータ
-				data := Config{
+				data := config.Config{
 					Username:     username,
 					Password:     password,
 				}
@@ -87,7 +82,8 @@ func NewLoginCmd() *cobra.Command {
 
 				// ファイル生成（更新）ログ
 				log.Printf("Created configFile into %q.\n",configFilePath)
-					
+			
+
 			}else{
 
 				// ファイル生成（更新）中止ログ
