@@ -57,44 +57,41 @@ func NewLoginCmd() *cobra.Command {
 			if err := client.Login(username,password); err != nil {
 				fmt.Println("Either the username or password is invalid.")
 				log.Fatal(err)
-			}else{
-				
-				// 生成確認
-				if flag,err := util.InputYN("Creating configFile? [Y/n] >> "); flag && err==nil {
+			}
+			// 生成確認
+			if flag,err := util.InputYN("Creating configFile? [Y/n] >> "); err==nil && flag {
 
-					if err := os.MkdirAll(path.Dir(configFilePath), 0700); err != nil {
-						log.Fatal(err)
-					}
+				if err := os.MkdirAll(path.Dir(configFilePath), 0700); err != nil {
+					log.Fatal(err)
+				}
 
-					fp, err := os.OpenFile(configFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-					if err != nil {
-						log.Fatal(err)
-					}
+				fp, err := os.OpenFile(configFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+				if err != nil {
+					log.Fatal(err)
+				}
 
-					defer fp.Close()
+				defer fp.Close()
 					
-					//JSONデータ
-					data := Config{
-						Username:     username,
-						Password:     password,
-					}
-					
-					bytes, _ := json.Marshal(&data)
-					
-					_,err = fp.WriteString(string(bytes))
-					if err != nil {
-						log.Fatal(err)
-					}
-
-					// ファイル生成（更新）ログ
-					log.Printf("Created configFile into %q.\n",configFilePath)
-					
-				}else{
-
-					// ファイル生成（更新）中止ログ
-					log.Printf("Not created configFile.\n")
+				//JSONデータ
+				data := Config{
+					Username:     username,
+					Password:     password,
 				}
 					
+				bytes, _ := json.Marshal(&data)
+					
+				_,err = fp.WriteString(string(bytes))
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				// ファイル生成（更新）ログ
+				log.Printf("Created configFile into %q.\n",configFilePath)
+					
+			}else{
+
+				// ファイル生成（更新）中止ログ
+				log.Printf("Not created configFile.\n")
 			}
 
 		},
