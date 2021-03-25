@@ -1,5 +1,3 @@
-// list api
-
 package api
 
 import (
@@ -12,7 +10,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-//フィールドも先頭一文字が大文字かどうかで public かどうかが決まる
 type SegmentInfo struct {
 	Name      string // ファイル or ディレクトリ の名前
 	Path      string // ファイルならダウンロード URL、ディレクトリなら移動先の URL
@@ -24,12 +21,19 @@ type SegmentInfo struct {
 }
 
 // セグメント情報の構造体のスライスを返す
-func (c *Client) List(path string) ([]SegmentInfo, error) {
+func (c *Client) List(path, volumeID string) ([]SegmentInfo, error) {
+	const ListEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wfb.cgi"
+
+	path = strings.Replace(path, "/", "\\", -1)
+
+	params := genCommonAccessParam(volumeID, path)
+	params.Set("sb", "name")
+	params.Set("so", "asc")
+
 	req, err := http.NewRequest(
 		http.MethodGet,
-		// TODO: ここを path にする
-		"https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wfb.cgi?t=p&v=resource_1423533946.487706.3&si=0&ri=0&pi=0&sb=name&so=asc&dir=report",
-		nil,
+		ListEndpoint,
+		strings.NewReader(params.Encode()),
 	)
 	if err != nil {
 		return nil, err
@@ -44,7 +48,6 @@ func (c *Client) List(path string) ([]SegmentInfo, error) {
 		return nil, errors.New("not 200")
 	}
 
-	// resp.Body は html
 	segmentInfos, err := getSegmentInfos(resp.Body)
 	if err != nil {
 		return nil, err
@@ -53,8 +56,6 @@ func (c *Client) List(path string) ([]SegmentInfo, error) {
 	return segmentInfos, nil
 }
 
-// func関数名(引数) (戻り値) {}
-//戻り値は2つ以上なら () をつける
 func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 	var segmentInfos []SegmentInfo
 
@@ -68,16 +69,12 @@ func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 		return nil, err
 	}
 
-	// ここで lines からファイル名とかサイズとかを抜きとり、SegmentInfo のスライスで返す
-
 	return segmentInfos, nil
 }
 
-// "d(...)" とか "f(...)"とかの形式で返す
 func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 	var segmentInfos []SegmentInfo
 
-	//要素をたどっていく
 	selection := doc.Find("table#table_wfb_5 > tbody > script")
 
 	lines := strings.Split(selection.Text()[1:], ";\n")
@@ -95,10 +92,8 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 			tokensSeg = SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
 				Path:      tokens[1][1 : len(tokens[1])-1],
-				IsFile:    false,
 				IsDir:     true,
 				Size:      -1,
-				Unit:      "",
 				UpdatedAt: tokens[2][1 : len(tokens[2])-1],
 			}
 		}
@@ -118,7 +113,6 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 				Name:      tokens[0][1 : len(tokens[0])-1],
 				Path:      tokens[1][1 : len(tokens[1])-1],
 				IsFile:    true,
-				IsDir:     false,
 				Size:      sizeValue,
 				Unit:      sizeUnit,
 				UpdatedAt: tokens[3][1 : len(tokens[3])-1],
