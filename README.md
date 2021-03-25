@@ -10,11 +10,23 @@
 
 2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `$HOME/cvpn/bin` です。
 
-#### Windows
+#### Recommended(Windows/Linux/MacOS)
+
+1. go 言語のコンパイラを [ここ](https://golang.org/doc/install) からインストールする  
+
+2. cvpn をインストール
+
+```console
+$ go get github.com/Shizuoka-Univ-dev/cvpn/cmd/cvpn
+```
+
+#### Binary
+
+##### Windows
 
 TODO
 
-#### Linux
+##### Linux
 
 ```console
 $ ls
@@ -26,7 +38,7 @@ $ echo 'export PATH="$PATH:$HOME/cvpn/bin"' >> $HOME/.profile
 $ source $HOME/.profile
 ```
 
-#### MacOS
+##### MacOS
 
 ```console
 $ ls
@@ -40,13 +52,14 @@ $ source $HOME/.profile
 
 ### Usage
 
-#### Login
+　一番最初に `login` を行ってください。`login` ではユーザー ID とパスワードを各 OS の設定ディレクトリ上に保存します。
 
 ```console
 $ cvpn login
-
-example
-$ cvpn login
+username >> cs200xx
+password >> your_password
+.
+.
 ```
 
 #### List
