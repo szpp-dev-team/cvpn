@@ -26,15 +26,13 @@ func LoadConfig() (Config, error) {
 	configFilePath := path.Join(configDir, "cvpn/config.json")
 
 	jsonFile, err := ioutil.ReadFile(configFilePath)
-
 	if err != nil {
 		return Config{}, err
 	}
 
 	//Config型のデータ
 	var data Config
-	err = json.Unmarshal(jsonFile, &data)
-	if err != nil {
+	if err := json.Unmarshal(jsonFile, &data); err != nil {
 		return Config{}, err
 	}
 
