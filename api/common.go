@@ -17,11 +17,6 @@ const (
 	VpnIndexURL = "https://vpn.inf.shizuoka.ac.jp/dana/home/index.cgi"
 )
 
-const (
-	VolumeIDFSShare = "resource_1423533946.487706.3"
-	VolumeIDFS      = "resource_1389773645.177066.2," // resource_1389773645.177066.2,2020 とか
-)
-
 type Client struct {
 	client     *http.Client
 	cookies    []string
