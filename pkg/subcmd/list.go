@@ -11,6 +11,8 @@ import (
 )
 
 func NewListCmd() *cobra.Command {
+	var volumeName string
+
 	cmd := &cobra.Command{
 		Use: "list",
 
@@ -32,6 +34,12 @@ func NewListCmd() *cobra.Command {
 				return err
 			}
 
+			// TODO
+			_, err := api.GetVolumeIDFromName(volumeName)
+			if err != nil {
+				return err
+			}
+
 			segInfos, err := client.List(args[0])
 			if err != nil {
 				return err
@@ -39,27 +47,26 @@ func NewListCmd() *cobra.Command {
 
 			s := ""
 
-			/*hoge := func(n int) string {
-				if n%2 == 0 {
-					return "even"
-				} else {
-					return "odd"
-				}
-			}(4)*/
-			format := genFormat(segInfos)
+			//format := genFormat(segInfos)　保留
 
 			fmt.Printf("index %4s name %50s size %4s upload-at %4s\n", s, s, s, s)
 			fmt.Println("ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー")
 
 			for i, _ := range segInfos {
-				//fmt.Println(segInfos[i].Unit)
-				//length := countStrLen(segInfos[i].Name)
+				if segInfos[i].Size == -1 {
+					fmt.Printf("%-11d%-50s  %s %s%s\n", i+1, segInfos[i].Name, segInfos[i].Path, s, segInfos[i].UpdatedAt)
+				} else {
+					f := fmt.Sprintf("%.2f", segInfos[i].Size)
+					fmt.Printf("%-11d%-50s  %s %s%s %s\n", i+1, segInfos[i].Name, segInfos[i].Path, f, segInfos[i].Unit, segInfos[i].UpdatedAt)
+				}
+				/*fmt.Println(segInfos[i].Unit)
+				length := countStrLen(segInfos[i].Name)
 				if segInfos[i].Size == -1 {
 					fmt.Printf(format, "\n", i+1, segInfos[i].Name, segInfos[i].Path, s, segInfos[i].UpdatedAt)
 				} else {
 					f := fmt.Sprintf("%.2f", segInfos[i].Size)
 					fmt.Printf(format, "\n", i+1, segInfos[i].Name, f, segInfos[i].Unit, segInfos[i].UpdatedAt)
-				}
+				} 保留 */
 			}
 
 			return nil
@@ -72,10 +79,13 @@ func NewListCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().StringVarP(&volumeName, "volume", "v", api.VolumeNameFSShare, "volume id [fsshare / fs]")
+
 	return cmd
 }
 
-func genFormat(s []api.SegmentInfo) string {
+/*func genFormat(s []api.SegmentInfo) string {
 	format := `%%-%dd%%-%ds%%-%ds %%s %%s`
 	maxname := 0
 	maxpath := 0
@@ -103,4 +113,4 @@ func countStrLen(s string) int {
 		}
 	}
 	return length
-}
+}　　保留*/
