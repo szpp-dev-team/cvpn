@@ -2,8 +2,11 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 
@@ -11,29 +14,35 @@ import (
 )
 
 type SegmentInfo struct {
-	Name      string  `json:"name"`       // ファイル or ディレクトリ の名前
-	Path      string  `json:"path"`       // ファイルならダウンロード URL、ディレクトリなら移動先の URL
-	IsFile    bool    `json:"is_file"`    // file であるか
-	IsDir     bool    `json:"is_dir"`     // dir であるか
-	Size      float64 `json:"size"`       // サイズ
-	Unit      string  `json:"unit"`       // サイズの単位
+	Name      string  `json:"name"`    // ファイル or ディレクトリ の名前
+	Path      string  `json:"path"`    // ファイルならダウンロード URL、ディレクトリなら移動先の URL
+	IsFile    bool    `json:"is_file"` // file であるか
+	IsDir     bool    `json:"is_dir"`  // dir であるか
+	Size      float64 `json:"size"`    // サイズ
+	Unit      string  `json:"unit"`    // サイズの単位
+	VolumeID  string  `json:"volume_id"`
 	UpdatedAt string  `json:"updated_at"` // できれば日時の構造体を使って欲しい
 }
 
 // セグメント情報の構造体のスライスを返す
-func (c *Client) List(path, volumeID string) ([]SegmentInfo, error) {
+func (c *Client) List(path, volumeID string) ([]*SegmentInfo, error) {
 	const ListEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wfb.cgi"
 
-	path = strings.Replace(path, "/", "\\", -1)
+	escapedPath := url.QueryEscape(path)
+	escapedPath = strings.Replace(escapedPath, "/", "\\", -1)
 
-	params := genCommonAccessParam(volumeID, path)
-	params.Set("sb", "name")
-	params.Set("so", "asc")
+	params := fmt.Sprintf(
+		"?t=p&v=%s&si=0&ri=0&pi=0&sb=%s&so=%s&dir=%s",
+		volumeID,
+		"name",
+		"asc",
+		escapedPath,
+	)
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		ListEndpoint,
-		strings.NewReader(params.Encode()),
+		ListEndpoint+params,
+		nil,
 	)
 	if err != nil {
 		return nil, err
@@ -45,10 +54,12 @@ func (c *Client) List(path, volumeID string) ([]SegmentInfo, error) {
 	}
 	defer resp.Body.Close() // List() が終わる時に実行する
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("not 200")
+		return nil, fmt.Errorf("not 200 but %d", resp.StatusCode)
 	}
 
-	segmentInfos, err := getSegmentInfos(resp.Body)
+	// TODO: ディレクトリが見つからなった時の処理
+
+	segmentInfos, err := getSegmentInfos(resp.Body, path)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +67,8 @@ func (c *Client) List(path, volumeID string) ([]SegmentInfo, error) {
 	return segmentInfos, nil
 }
 
-func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
-	var segmentInfos []SegmentInfo
+func getSegmentInfos(body io.ReadCloser, dirPath string) ([]*SegmentInfo, error) {
+	var segmentInfos []*SegmentInfo
 
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
@@ -69,13 +80,22 @@ func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 		return nil, err
 	}
 
+	for _, segmentInfo := range segmentInfos {
+		s := path.Join(dirPath, segmentInfo.Name)
+		segmentInfo.Path = s
+	}
+
 	return segmentInfos, nil
 }
 
-func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
-	var segmentInfos []SegmentInfo
+func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
+	var segmentInfos []*SegmentInfo
 
 	selection := doc.Find("table#table_wfb_5 > tbody > script")
+
+	if selection.Length() == 0 {
+		return nil, errors.New("Maybe you failed to write directory's name, or this directory hasn't data!!!")
+	}
 
 	lines := strings.Split(selection.Text()[1:], ";\n")
 
@@ -86,12 +106,11 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 
 		tokens := strings.Split(line[2:len(line)-1], ",")
 
-		var tokensSeg SegmentInfo
+		var tokensSeg *SegmentInfo
 
 		if len(tokens) == 3 { //ディレクトリの場合は要素数が3
-			tokensSeg = SegmentInfo{
+			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
-				Path:      tokens[1][1 : len(tokens[1])-1],
 				IsDir:     true,
 				Size:      -1,
 				UpdatedAt: tokens[2][1 : len(tokens[2])-1],
@@ -109,9 +128,8 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 			} else { //そうじゃない場合はbytes
 				sizeUnit = sizeItem[1][len(sizeItem[1])-5:]
 			}
-			tokensSeg = SegmentInfo{
+			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
-				Path:      tokens[1][1 : len(tokens[1])-1],
 				IsFile:    true,
 				Size:      sizeValue,
 				Unit:      sizeUnit,

@@ -83,10 +83,10 @@ func TestList(t *testing.T) {
 	}
 
 	const (
-		path = "/report"
-		// volumeID = VolumeIDFSShare
+		path     = "/report"
+		volumeID = VolumeIDFSShare
 	)
-	segmentInfos, err := client.List(path)
+	segmentInfos, err := client.List(path, volumeID)
 	if err != nil {
 		t.Fatal(err)
 	}
