@@ -8,7 +8,7 @@ import (
 
 func NewListCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "list",
+		Use: "list",
 
 		Aliases: []string{"ls"},
 		Short:   "list files and directorys from path",
