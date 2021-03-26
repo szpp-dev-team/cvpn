@@ -44,7 +44,7 @@ func NewListCmd() *cobra.Command {
 				return err
 			}
 
-			printSegmentInfo(segInfos, showPathFlg)
+			printSegmentInfos(segInfos, showPathFlg)
 
 			return nil
 		},
@@ -63,25 +63,19 @@ func NewListCmd() *cobra.Command {
 	return cmd
 }
 
-func printSegmentInfo(segInfos []*api.SegmentInfo, showPathFlg bool) {
-	if showPathFlg {
-		fmt.Printf("%-7s%-50s%50s%12s%8s\n", "index", "name", "path", "size", "uploaded_at")
-	} else {
-		fmt.Printf("%-7s%-50s%-14s%-8s\n", "index", "name", "size", "uploaded_at")
-	}
-
-	for i, segInfo := range segInfos {
+func printSegmentInfos(segInfos []*api.SegmentInfo, showPathFlg bool) {
+	for _, segInfo := range segInfos {
 		if showPathFlg {
-			if segInfo.IsDir {
-				fmt.Printf("%-6d %-50s %s %-12s %-8s\n", i+1, " "+segInfo.Name, segInfo.Path, "", segInfo.UpdatedAt)
+			if segInfo.IsFile {
+				fmt.Printf("% 4.2f[%2s]   %s   %s(%s)\n", segInfo.Size, segInfo.Unit, segInfo.UpdatedAt, " "+segInfo.Name, segInfo.Path)
 			} else {
-				fmt.Printf("%-6d %-50s %s %.2f[%s] %-8s\n", i+1, " "+segInfo.Name, segInfo.Path, segInfo.Size, segInfo.Unit, segInfo.UpdatedAt)
+				fmt.Printf("%8s   %s   %s(%s)\n", "-", segInfo.UpdatedAt, " "+segInfo.Name, segInfo.Path)
 			}
 		} else {
-			if segInfo.IsDir {
-				fmt.Printf("%-6d %-50s %-12s %-8s\n", i+1, " "+segInfo.Name, "", segInfo.UpdatedAt)
+			if segInfo.IsFile {
+				fmt.Printf("%-5.2f[%2s]   %s   %s\n", segInfo.Size, segInfo.Unit, segInfo.UpdatedAt, " "+segInfo.Name)
 			} else {
-				fmt.Printf("%-6d %-50s %.2f[%s] %-8s\n", i+1, " "+segInfo.Name, segInfo.Size, segInfo.Unit, segInfo.UpdatedAt)
+				fmt.Printf("%9s   %s   %s\n", "-", segInfo.UpdatedAt, " "+segInfo.Name)
 			}
 		}
 	}

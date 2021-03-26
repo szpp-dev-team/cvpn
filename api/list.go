@@ -126,7 +126,7 @@ func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
 			if sizeItem[1][len(sizeItem[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
 				sizeUnit = sizeItem[1][len(sizeItem[1])-2:]
 			} else { //そうじゃない場合はbytes
-				sizeUnit = sizeItem[1][len(sizeItem[1])-5:]
+				sizeUnit = "B"
 			}
 			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
