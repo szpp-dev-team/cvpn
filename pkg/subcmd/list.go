@@ -65,15 +65,15 @@ func printSegmentInfos(segInfos []*api.SegmentInfo, showPathFlg bool) {
 	for _, segInfo := range segInfos {
 		if showPathFlg {
 			if segInfo.IsFile {
-				fmt.Printf("% 4.2f[%2s]   %s   %s(%s)\n", segInfo.Size, segInfo.Unit, segInfo.UpdatedAt, " "+segInfo.Name, segInfo.Path)
+				fmt.Printf("%-6.2f[%2s]   %s   %s(%s)\n", segInfo.Size, segInfo.Unit, segInfo.UpdatedAt, " "+segInfo.Name, segInfo.Path)
 			} else {
-				fmt.Printf("%8s   %s   %s(%s)\n", "-", segInfo.UpdatedAt, " "+segInfo.Name, segInfo.Path)
+				fmt.Printf("%10s   %s   %s(%s)\n", "-", segInfo.UpdatedAt, " "+segInfo.Name, segInfo.Path)
 			}
 		} else {
 			if segInfo.IsFile {
-				fmt.Printf("%-5.2f[%2s]   %s   %s\n", segInfo.Size, segInfo.Unit, segInfo.UpdatedAt, " "+segInfo.Name)
+				fmt.Printf("%-6.2f[%2s]   %s   %s\n", segInfo.Size, segInfo.Unit, segInfo.UpdatedAt, " "+segInfo.Name)
 			} else {
-				fmt.Printf("%9s   %s   %s\n", "-", segInfo.UpdatedAt, " "+segInfo.Name)
+				fmt.Printf("%10s   %s   %s\n", "-", segInfo.UpdatedAt, " "+segInfo.Name)
 			}
 		}
 	}
