@@ -6,53 +6,62 @@
 
 ### Installation
 
-1. [release ページ](https://github.com/szpp-dev-team/cvpn/releases) から適切なファイルをダウンロードし、展開してください。  
+#### 【Recommend】go get (Windows/Linux/MacOS)
 
-2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `$HOME/cvpn/bin` です。
+1. go 言語のコンパイラを [ここ](https://golang.org/doc/install) からインストールする
 
-#### Recommended(Windows/Linux/MacOS)
-
-1. go 言語のコンパイラを [ここ](https://golang.org/doc/install) からインストールする  
-
-2. cvpn をインストール
+2. パスを通す
 
 ```console
-$ go get github.com/Shizuoka-Univ-dev/cvpn/cmd/cvpn
+# linux
+$ echo 'export PATH="$PATH:$HOME/go/bin"' >> $HOME/.profile
+
+# mac
+$ echo 'export PATH="$HOME/go/bin:$PATH"' >> $HOME/.profile
+```
+
+3. cvpn をインストール
+
+```console
+$ go get -u github.com/Shizuoka-Univ-dev/cvpn/cmd/cvpn
+$ source $HOME/.profile
+$ cvpn
+cvpn is a tool which makes you happy
+.
+.
 ```
 
 #### Binary
+
+1. [release ページ](https://github.com/szpp-dev-team/cvpn/releases) から適切なファイルをダウンロードし、展開してください。  
+
+2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `CVPN_PATH=$HOME/cvpn/bin` です。
 
 ##### Windows
 
 TODO
 
-##### Linux
+##### Linux & MacOS
 
 ```console
 $ ls
-cvpn_linux_amd64 があることを確認
+cvpn_linux_amd64 or cvpn_darwin_amd64 があることを確認
 
-$ mkdir -p $HOME/cvpn/bin
-$ cp cvpn_linux_amd64 $HOME/cvpn/bin/cvpn
-$ echo 'export PATH="$PATH:$HOME/cvpn/bin"' >> $HOME/.profile
+$ CVPN_PATH=$HOME/cvpn/bin
+$ mkdir -p $CVPN_PATH
+$ cp cvpn_linux_amd64 $CVPN_PATH (mac: cp cvpn_darwin_amd64 $HOME/cvpn/bin/cvpn)
+$ echo 'export PATH=$PATH:$CVPN_PATH' >> $HOME/.profile
 $ source $HOME/.profile
-```
-
-##### MacOS
-
-```console
-$ ls
-cvpn_darwin_amd64 があることを確認
-
-$ mkdir -p $HOME/cvpn/bin
-$ cp cvpn_darwin_amd64 $HOME/cvpn/bin/cvpn
-$ echo 'export PATH="$PATH:$HOME/cvpn/bin"' >> $HOME/.profile
-$ source $HOME/.profile
+$ cvpn
+cvpn is a tool which makes you happy
+.
+.
 ```
 
 ### Usage
 
-　一番最初に `login` を行ってください。`login` ではユーザー ID とパスワードを各 OS の設定ディレクトリ上に保存します。
+　一番最初に `login` を行ってください。`login` ではユーザー ID とパスワードを各 OS の設定ディレクトリ上に保存します。  
+また、途中で作成を確認するプロンプトが表示されますが、設定ファイルの作成を許可する場合は `y`, 許可しない場合は `n` を入力してください。
 
 ```console
 $ cvpn login
@@ -65,11 +74,25 @@ password >> your_password
 #### List
 
 ```console
-$ cvpn ls
+$ cvpn ls {dir_path} -v {volume} --path
 
 example
-$ cvpn ls
+$ cvpn ls /
+        -   Fri Mar 19 11:16:58 2021    class
+        -   Fri Mar 12 13:39:21 2021    report
+        -   Thu Mar 18 12:29:33 2021    student
+8.00 [KB]   Thu Oct 18 14:16:46 2018    .DS_Store
 ```
+
+`{dir_path}` 上のファイルとディレクトリを一覧表示します。  
+絵文字を使用したりしているため、ターミナルのフォントを [Nerd Font](https://www.nerdfonts.com/) にすることを推奨します。  
+推奨フォントは [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip) です。
+
++ Options
+  
+  + `--path`: ファイル or ディレクトリのパスを表示します。  
+  
+  + `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
 #### Download
 
@@ -80,35 +103,19 @@ example
 $ cvpn download /report/hoge.txt
 ```
 
-`{volume}` 上の `{target_path}` をダウンロードし、 `{save_path}` に保存します。  
-オプションの指定がない場合、`{target_path}` はカレントディレクトリ、`{volume}` は `FSshare` がデフォルト値として設定されます。
+`{target_file_path}` をダウンロードします。
+
++ Options
+
+  + `-o {save_path}`: ダウンロードしたファイルの保存先を指定します。**必ずディレクトリのパスを指定してください**(仕様変更予定)
+  
+  + `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
 #### Upload
 
 現在開発中です。
 
-```console
-$ cvpn upload
-
-example
-$ cvpn upload
-```
-
 ### Development
-
-原則として devcontainer 上で開発してください。
-
-#### Requirements
-
-+ [Docker](https://www.docker.com/get-started)
-+ [VScode](https://code.visualstudio.com/download)
-
-#### Steps
-
-1. VScode の拡張機能 `Remote Development` をインストールする。  
-2. `cvpn-go/` ディレクトリを VScode で開き、左下の青いボタンをクリックし、`Remote-Containers: Reopen in Container` を選択する。※ここで環境がホストからコンテナ上に切り替わるので注意。  
-3. コマンドパレットを開いて `Go: Install/Update Tools` と入力して、全てのツールをチェックしてインストールする。  
-4. (任意) git の ssh 設定？
 
 #### Build
 
@@ -116,24 +123,4 @@ $ cvpn upload
 $ make windows
 $ make linux
 $ make darwin
-```
-
-#### Direcotry Structure
-
-```console
-cmd/
-  └ cvpn
-      └ main.go     # エントリーポイント(main 関数だけ)
-  
-api/
-  ├ common.go       # api の共通部分(構造体とかリクエストとか)
-  ├ auth.go         # auth api
-  ├ download.go     # download api
-  └ list.go         # list api
-
-pkg/
-  ├ config/         # config 関係
-  |   └ config.go   
-  └ util/           # ユーティリティ(入力とか)
-      └ input.go
 ```
