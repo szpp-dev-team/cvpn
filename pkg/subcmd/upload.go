@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
+	"github.com/Shizuoka-Univ-dev/cvpn/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -32,10 +33,14 @@ func NewUploadCmd() *cobra.Command {
 			uploadPath := args[1] //アップロード先のURL
 
 			client := api.NewClient()
-			username := os.Getenv("SVPN_USERNAME")
-			password := os.Getenv("SVPN_PASSWORD")
+			config, err := config.LoadConfig()
 
-			if err := client.LoadCookiesOrLogin(username, password); err != nil {
+			if err != nil {
+				log.Fatal(err)
+				os.Exit(1)
+			}
+
+			if err := client.LoadCookiesOrLogin(config.Username, config.Password); err != nil {
 				log.Fatal(err)
 				os.Exit(1)
 			}

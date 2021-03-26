@@ -2,10 +2,9 @@ package subcmd
 
 import (
 	"errors"
-	"os"
 
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
-	"github.com/joho/godotenv"
+	"github.com/Shizuoka-Univ-dev/cvpn/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -19,15 +18,13 @@ func NewDownloadCmd() *cobra.Command {
 		Use:   "download",
 		Short: "download a file from path",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO: LoadConfig()
-			_ = godotenv.Load(".env")
-			var (
-				username = os.Getenv("SVPN_USERNAME")
-				password = os.Getenv("SVPN_PASSWORD")
-			)
+			config, err := config.LoadConfig()
+			if err != nil {
+				return err
+			}
 
 			client := api.NewClient()
-			if err := client.LoadCookiesOrLogin(username, password); err != nil {
+			if err := client.LoadCookiesOrLogin(config.Username, config.Password); err != nil {
 				return err
 			}
 
