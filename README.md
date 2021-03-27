@@ -60,6 +60,8 @@ cvpn is a tool which makes you happy
 
 ### Usage
 
+> Note: パスやオプションの指定が `{...}` となっていますが、このとき `{}` をつけて入力する必要はありません。
+
 　一番最初に `login` を行ってください。`login` ではユーザー ID とパスワードを各 OS の設定ディレクトリ上に保存します。  
 また、途中で作成を確認するプロンプトが表示されますが、設定ファイルの作成を許可する場合は `y`, 許可しない場合は `n` を入力してください。
 
@@ -77,11 +79,9 @@ password >> your_password
 $ cvpn ls {dir_path} -v {volume} --path
 
 example
-$ cvpn ls /
-        -   Fri Mar 19 11:16:58 2021    class
-        -   Fri Mar 12 13:39:21 2021    report
-        -   Thu Mar 18 12:29:33 2021    student
-8.00 [KB]   Thu Oct 18 14:16:46 2018    .DS_Store
+$ cvpn ls /report
+.
+.
 ```
 
 `{dir_path}` 上のファイルとディレクトリを一覧表示します。  
