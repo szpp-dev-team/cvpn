@@ -6,7 +6,11 @@
 
 ### Installation
 
-#### 【Recommend】go get (Windows/Linux/MacOS)
+インストール方法は以下の2種類があります。推奨する方法は `go get` です。
+- `go get` によるビルド & インストール 【推奨】
+- release ページからビルド済みバイナリをダウンロード
+
+#### インストール方法A: go get 【推奨】
 
 1. go 言語のコンパイラを [ここ](https://golang.org/doc/install) からインストールする
 
@@ -31,11 +35,12 @@ cvpn is a tool which makes you happy
 .
 ```
 
-#### Binary
+#### インストール方法B: ビルド済みバイナリのダウンロード
 
 1. [release ページ](https://github.com/szpp-dev-team/cvpn/releases) から適切なファイルをダウンロードし、展開してください。  
 
-2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `CVPN_PATH=$HOME/cvpn/bin` です。
+2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `CVPN_PATH=$HOME/cvpn/bin` です。  
+以下に設定手順の例を示します。
 
 ##### Windows
 
@@ -44,12 +49,13 @@ TODO
 ##### Linux & MacOS
 
 ```console
+$ cd バイナリファイルをダウンロードしたディレクトリ
 $ ls
 cvpn_linux_amd64 or cvpn_darwin_amd64 があることを確認
 
 $ CVPN_PATH=$HOME/cvpn/bin
 $ mkdir -p $CVPN_PATH
-$ cp cvpn_linux_amd64 $CVPN_PATH (mac: cp cvpn_darwin_amd64 $HOME/cvpn/bin/cvpn)
+$ cp cvpn_linux_amd64 $CVPN_PATH # (mac: cp cvpn_darwin_amd64 $HOME/cvpn/bin/cvpn)
 $ echo 'export PATH=$PATH:$CVPN_PATH' >> $HOME/.profile
 $ source $HOME/.profile
 $ cvpn
@@ -75,6 +81,8 @@ password >> your_password
 
 #### List
 
+`cvpn ls` コマンドは指定した `{dir_path}` 上のファイルとディレクトリを一覧表示します。  
+
 ```console
 $ cvpn ls {dir_path} -v {volume} --path
 
@@ -84,7 +92,6 @@ $ cvpn ls /report -v fsshare
 .
 ```
 
-`{dir_path}` 上のファイルとディレクトリを一覧表示します。  
 絵文字を使用したりしているため、ターミナルのフォントを [Nerd Font](https://www.nerdfonts.com/) にすることを推奨します。  
 推奨フォントは [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip) です。
 
@@ -98,14 +105,14 @@ $ cvpn ls /report -v fsshare
 
 #### Download
 
+`cvpn download` コマンドは指定した `{target_file_path}` をダウンロードします。
+
 ```console
 $ cvpn download {target_file_path} -o {save_path} -v {volume}
 
 example
 $ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 ```
-
-`{target_file_path}` をダウンロードします。
 
 + Options
 
@@ -118,6 +125,8 @@ $ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 現在開発中です。
 
 ### Development
+
+開発者向けの内容です。
 
 #### Build
 
