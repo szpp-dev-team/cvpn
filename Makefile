@@ -6,7 +6,7 @@ windows:
 linux:
 	GOOS=linux \
 	GOARCH=amd64 \
-	go build -o ./cvpn_linux_amd64 ./cmd/cvpn/main.go
+	go build -o ./cvpn_linux_amd64 ./cmd/cvpn/main.go 
 
 darwin:
 	GOOS=darwin \
