@@ -79,7 +79,7 @@ password >> your_password
 $ cvpn ls {dir_path} -v {volume} --path
 
 example
-$ cvpn ls /report
+$ cvpn ls /report -v fsshare
 .
 .
 ```
@@ -102,7 +102,7 @@ $ cvpn ls /report
 $ cvpn download {target_file_path} -o {save_path} -v {volume}
 
 example
-$ cvpn download /report/hoge.txt
+$ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 ```
 
 `{target_file_path}` をダウンロードします。
