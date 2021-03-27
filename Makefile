@@ -12,4 +12,3 @@ darwin:
 	GOOS=darwin \
 	GOARCH=amd64 \
 	go build -o ./cvpn_darwin_amd64 ./cmd/cvpn/main.go
-
