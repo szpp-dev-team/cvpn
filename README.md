@@ -94,6 +94,8 @@ $ cvpn ls /report
   
   + `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
+> Note: volume は FSShare や FS などのことを示します。
+
 #### Download
 
 ```console
