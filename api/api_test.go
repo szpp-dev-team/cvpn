@@ -64,8 +64,8 @@ func TestUpload(t *testing.T) {
 	const (
 		srcFilePath     = "./../test.txt"
 		renamedFileName = "upload-rename-test.txt"
-		volumeID        = VolumeIDFS + ",{dir}"
-		destDirPath     = "cs200XX"
+		volumeID        = VolumeIDFS + "2020"
+		destDirPath     = "cs20097"
 	)
 	if err := client.UploadFile(srcFilePath, renamedFileName, volumeID, destDirPath); err != nil {
 		t.Fatal(err)
