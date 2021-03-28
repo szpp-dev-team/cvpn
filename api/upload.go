@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -65,7 +66,30 @@ func (c *Client) UploadFile(srcPath, fileRenameOpt, volumeID, destDirPath string
 		return fmt.Errorf("StatusCode of file uploading was %d (expected: 200 OK)", resp.StatusCode)
 	}
 
+	ok, err := uploadResult(resp.Body)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("Failed to upload file. Please confirm destination path and so on.")
+	}
+
 	return nil
+}
+
+func uploadResult(htmlBody io.ReadCloser) (bool, error) {
+	doc, err := goquery.NewDocumentFromReader(htmlBody)
+	if err != nil {
+		return false, err
+	}
+
+	selection := doc.Find("table#table_useruimenu_10.tdContent > tbody > tr > td > form > input")
+
+	value, exists := selection.Next().Attr("value")
+	if exists {
+		return !strings.Contains(value, "Failed to upload all the files"), nil
+	}
+	return exists, nil
 }
 
 func (c *Client) scrapeTrackID4Upload(volumeID, destDirPath string) (string, error) {
