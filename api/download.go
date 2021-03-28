@@ -3,6 +3,7 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -61,6 +62,21 @@ func (c *Client) downloadFile(reqURL, fileName, dirPath string, params *url.Valu
 		return err
 	}
 	defer file.Close()
+
+	// ダウンロード対象のファイルが存在しない場合は HTML で エラーメッセージが返ってくる
+	if strings.Contains(resp.Header.Get("Content-Type"), "html") {
+		const fileNotFoundMessage = "The file or folder does not exist on the server. Please contact your system administrator."
+		tee := io.TeeReader(resp.Body, file)
+		htmlBytes, err := io.ReadAll(tee)
+		if err != nil {
+			return err
+		}
+		if bytes.Contains(htmlBytes, []byte(fileNotFoundMessage)) {
+			file.Close()
+			os.Remove(savePath)
+			return fmt.Errorf("File does not found. You may wrong the argument `path` or `volume`.")
+		}
+	}
 
 	n, err := io.Copy(file, resp.Body)
 	if err != nil {

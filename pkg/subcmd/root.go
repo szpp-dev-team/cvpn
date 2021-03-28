@@ -10,7 +10,6 @@ func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cvpn",
 		Short: "cvpn is a tool which makes you happy",
-		Long:  "クソナガ説明",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
 				_ = cmd.Help()
