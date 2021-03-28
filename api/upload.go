@@ -135,15 +135,15 @@ func createMultipartBody4Upload(info *uploadReqInfo) (contentType string, body *
 		}
 
 		createField(mw, "txtRenameFile1", info.FileRenameOpt)
-	}
 
-	for i := 2; i <= 5; i++ {
-		header := make(textproto.MIMEHeader)
-		header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file%d"; filename=""`, i))
-		header.Set("Content-Type", "application/octet-stream")
-		_, _ = mw.CreatePart(header)
+		for i := 2; i <= 5; i++ {
+			header := make(textproto.MIMEHeader)
+			header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file%d"; filename=""`, i))
+			header.Set("Content-Type", "application/octet-stream")
+			_, _ = mw.CreatePart(header)
 
-		createField(mw, "txtRenameFile"+strconv.Itoa(i), info.FileRenameOpt)
+			createField(mw, "txtRenameFile"+strconv.Itoa(i), info.FileRenameOpt)
+		}
 	}
 
 	// フォームの普通のフィールドの書き出し
@@ -185,7 +185,5 @@ func contentTypeFromFile(file *os.File) string {
 func createField(mw *multipart.Writer, key, value string) {
 	partWriter, _ := mw.CreateFormField(key)
 
-	// queryedValue := url.QueryEscape(value)
-	queryedValue := value
-	_, _ = partWriter.Write([]byte(queryedValue))
+	_, _ = partWriter.Write([]byte(value))
 }
