@@ -28,7 +28,7 @@ $ echo 'export PATH="$HOME/go/bin:$PATH"' >> $HOME/.profile
 3. cvpn をインストール
 
 ```console
-$ go install github.com/Shizuoka-Univ-dev/cvpn@latest
+$ go install github.com/Shizuoka-Univ-dev/cvpn/cmd/cvpn@latest
 $ source $HOME/.profile
 $ cvpn
 cvpn is a tool which makes you happy
