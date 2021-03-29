@@ -1,11 +1,14 @@
 project_name: cvpn
+
 env:
   - GO111MODULE=on
+  
 before:
   hooks:
     - go mod tidy
+    
 builds:
-  - main: ./cmd/cvpn/main.go
+  - main: ./cmd/cvpn
     binary: cvpn
     ldflags:
       - -s -w
@@ -13,6 +16,13 @@ builds:
       - -X main.Revision={{.ShortCommit}}
     env:
       - CGO_ENABLED=0
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     replacements:
