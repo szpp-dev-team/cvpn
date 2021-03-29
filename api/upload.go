@@ -2,13 +2,14 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"net/url"
+	"net/textproto"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -50,7 +51,7 @@ func (c *Client) UploadFile(srcPath, fileRenameOpt, volumeID, destDirPath string
 
 	// アップロード先URL には trackID の末尾にUNIX時間を追加したクエリパラメータを付与する
 	uploadURL := ("https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wu.cgi" +
-		"?trackid=" + trackID + strconv.FormatInt(time.Now().Unix(), 10))
+		"?trackid=" + trackID + strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10))
 	req, err := http.NewRequest(http.MethodPost, uploadURL, multipartBody)
 	if err != nil {
 		return err
@@ -64,7 +65,31 @@ func (c *Client) UploadFile(srcPath, fileRenameOpt, volumeID, destDirPath string
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("StatusCode of file uploading was %d (expected: 200 OK)", resp.StatusCode)
 	}
+
+	ok, err := uploadResult(resp.Body)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("Failed to upload file. Please confirm destination path and so on.")
+	}
+
 	return nil
+}
+
+func uploadResult(htmlBody io.ReadCloser) (bool, error) {
+	doc, err := goquery.NewDocumentFromReader(htmlBody)
+	if err != nil {
+		return false, err
+	}
+
+	selection := doc.Find("table#table_useruimenu_10.tdContent > tbody > tr > td > form > input")
+
+	value, exists := selection.Next().Attr("value")
+	if exists {
+		return !strings.Contains(value, "Failed to upload all the files"), nil
+	}
+	return exists, nil
 }
 
 func (c *Client) scrapeTrackID4Upload(volumeID, destDirPath string) (string, error) {
@@ -83,6 +108,7 @@ func (c *Client) scrapeTrackID4Upload(volumeID, destDirPath string) (string, err
 	if err != nil {
 		return "", err
 	}
+
 	resp, err := c.request(req)
 	if err != nil {
 		return "", err
@@ -92,10 +118,12 @@ func (c *Client) scrapeTrackID4Upload(volumeID, destDirPath string) (string, err
 	if err != nil {
 		return "", err
 	}
+
 	trackid, exists := docScraper.Find("#trackid_1").Attr("value")
 	if !exists {
 		return "", fmt.Errorf("`trackid` not found: request URL: %q", uploadFormURL)
 	}
+
 	return trackid, nil
 }
 
@@ -103,6 +131,11 @@ func (c *Client) scrapeTrackID4Upload(volumeID, destDirPath string) (string, err
 func createMultipartBody4Upload(info *uploadReqInfo) (contentType string, body *bytes.Buffer, err error) {
 	formBodyBuff := &bytes.Buffer{}
 	mw := multipart.NewWriter(formBodyBuff)
+
+	{
+		createField(mw, "xsauth", info.XSAuth)
+		createField(mw, "txtServerUploadID", "")
+	}
 
 	// ファイルの書き出し
 	{
@@ -112,39 +145,69 @@ func createMultipartBody4Upload(info *uploadReqInfo) (contentType string, body *
 		}
 		defer srcFile.Close()
 
-		partWriter, _ := mw.CreateFormFile("file1", path.Base(info.SrcPath))
+		header := make(textproto.MIMEHeader)
+		header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file1"; filename="%s"`, info.SrcPath))
+		header.Set("Content-Type", contentTypeFromFile(srcFile))
+
+		partWriter, err := mw.CreatePart(header)
+		if err != nil {
+			return "", nil, err
+		}
+
 		if _, err = io.Copy(partWriter, srcFile); err != nil {
 			return "", nil, err
+		}
+
+		createField(mw, "txtRenameFile1", info.FileRenameOpt)
+
+		for i := 2; i <= 5; i++ {
+			header := make(textproto.MIMEHeader)
+			header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file%d"; filename=""`, i))
+			header.Set("Content-Type", "application/octet-stream")
+			_, _ = mw.CreatePart(header)
+
+			createField(mw, "txtRenameFile"+strconv.Itoa(i), info.FileRenameOpt)
 		}
 	}
 
 	// フォームの普通のフィールドの書き出し
 	{
-		formFields := genCommonAccessParam(info.VolumeID, info.destDirPath)
-		formFields.Set("acttype", "upload")
-		formFields.Set("confirm", "yes")
-		formFields.Set("ignoreDfs", "1")
-		formFields.Set("trackid", info.trackID)
-		formFields.Set("txtRenameFile1", info.FileRenameOpt)
-		formFields.Set("txtServerUploadID", "")
-		formFields.Set("xsauth", info.XSAuth)
-
-		for key, values := range *formFields {
-			partWriter, err := mw.CreateFormField(key)
-			if err != nil {
-				return "", nil, err
-			}
-			if len(values) > 1 {
-				return "", nil, fmt.Errorf("The form value of %q cannot be multiple (got: %v)", key, values)
-			}
-			value := url.QueryEscape(formFields.Get(key))
-			if _, err = partWriter.Write([]byte(value)); err != nil {
-				return "", nil, err
-			}
-		}
+		createField(mw, "t", "p")
+		createField(mw, "v", info.VolumeID)
+		createField(mw, "si", "")
+		createField(mw, "ri", "")
+		createField(mw, "pi", "")
+		createField(mw, "dir", info.destDirPath)
+		createField(mw, "acttype", "upload")
+		createField(mw, "confirm", "yes")
+		createField(mw, "trackid", info.trackID)
+		createField(mw, "ignoreDfs", "1")
+		createField(mw, "btnUpload", "アップロード")
 	}
+
 	if err := mw.Close(); err != nil {
 		return "", nil, err
 	}
+
 	return mw.FormDataContentType(), formBodyBuff, nil
+}
+
+// https://qiita.com/ijufumi/items/c2d9f53262bb1f931d4e
+func contentTypeFromFile(file *os.File) string {
+	defer func() {
+		_, _ = file.Seek(0, 0)
+	}()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return "application/octet-stream"
+	}
+
+	return http.DetectContentType(data)
+}
+
+func createField(mw *multipart.Writer, key, value string) {
+	partWriter, _ := mw.CreateFormField(key)
+
+	_, _ = partWriter.Write([]byte(value))
 }
