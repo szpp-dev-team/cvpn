@@ -123,7 +123,18 @@ $ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 
 #### Upload
 
-現在開発中です。
+`cvpn upload` コマンドは `{source_file_path}` ファイルを `{dst_path}` 上にアップロードします。 
+
+```console
+$ cvpn upload {source_file_path} {dst_path} -v {volume}
+
+example
+$ cvpn upload text.txt /cs200xx -v fs/2020
+```
+
+- Options
+  
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
 ### Development
 
