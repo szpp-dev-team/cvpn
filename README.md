@@ -95,11 +95,11 @@ $ cvpn ls /report -v fsshare
 絵文字を使用したりしているため、ターミナルのフォントを [Nerd Font](https://www.nerdfonts.com/) にすることを推奨します。  
 推奨フォントは [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip) です。
 
-+ Options
+- Options
   
-  + `--path`: ファイル or ディレクトリのパスを表示します。  
+  - `--path`: ファイル or ディレクトリのパスを表示します。  
   
-  + `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
 > Note: volume は FSShare や FS などのことを示します。
 
@@ -114,11 +114,11 @@ example
 $ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 ```
 
-+ Options
+- Options
 
-  + `-o {save_path}`: ダウンロードしたファイルの保存先を指定します。**必ずディレクトリのパスを指定してください**(仕様変更予定)
+  - `-o {save_path}`: ダウンロードしたファイルの保存先を指定します。**必ずディレクトリのパスを指定してください**(仕様変更予定)
   
-  + `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
 #### Upload
 
