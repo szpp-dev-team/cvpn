@@ -34,6 +34,10 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+      - goos: linux
+        format: zip
+      - goos: darwin
+        format: zip
 
 release:
   prerelease: auto
