@@ -17,24 +17,12 @@ func NewUploadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upload",
 		Short: "upload a file from path",
-
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 2 {
-				return errors.New("Not enough args")
-			}
-
-			return nil
-		},
-
-		Run: func(cmd *cobra.Command, args []string) { //args:コマンドライン引数
-			//go run cmd/cvpn/main.go upload aiueo -> args[0] = aiueo
-
+		Run: func(cmd *cobra.Command, args []string) {
 			srcPath := args[0]    //ソース
 			uploadPath := args[1] //アップロード先のURL
 
 			client := api.NewClient()
 			config, err := config.LoadConfig()
-
 			if err != nil {
 				log.Fatal(err)
 				os.Exit(1)
@@ -45,10 +33,8 @@ func NewUploadCmd() *cobra.Command {
 				os.Exit(1)
 			}
 
-			var rename string = ""
-
+			var rename string = "" // TODO
 			volumeID, err := api.GetVolumeIDFromName(volumeName)
-
 			if err != nil {
 				log.Fatal(err)
 				os.Exit(1)
@@ -58,7 +44,13 @@ func NewUploadCmd() *cobra.Command {
 				log.Fatal(err)
 				os.Exit(1)
 			}
+		},
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return errors.New("Not enough args")
+			}
 
+			return nil
 		},
 	}
 
