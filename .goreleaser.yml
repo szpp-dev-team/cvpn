@@ -1,9 +1,12 @@
 project_name: cvpn
+
 env:
   - GO111MODULE=on
+
 before:
   hooks:
     - go mod tidy
+
 builds:
   - main: ./cmd/cvpn/main.go
     binary: cvpn
@@ -13,6 +16,13 @@ builds:
       - -X main.Revision={{.ShortCommit}}
     env:
       - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     replacements:
@@ -24,5 +34,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+
 release:
   prerelease: auto
