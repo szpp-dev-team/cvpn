@@ -6,8 +6,9 @@
 
 ### Installation
 
-インストール方法は以下の2種類があります。推奨する方法は `go get` です。
-- `go get` によるビルド & インストール 【推奨】
+インストール方法は以下の2種類があります。推奨する方法は `go install` です。
+
+- `go install` によるビルド & インストール 【推奨】
 - release ページからビルド済みバイナリをダウンロード
 
 #### インストール方法A: go get 【推奨】
@@ -27,7 +28,7 @@ $ echo 'export PATH="$HOME/go/bin:$PATH"' >> $HOME/.profile
 3. cvpn をインストール
 
 ```console
-$ go get -u github.com/Shizuoka-Univ-dev/cvpn/cmd/cvpn
+$ go install github.com/Shizuoka-Univ-dev/cvpn@latest
 $ source $HOME/.profile
 $ cvpn
 cvpn is a tool which makes you happy
@@ -51,11 +52,11 @@ TODO
 ```console
 $ cd バイナリファイルをダウンロードしたディレクトリ
 $ ls
-cvpn_linux_amd64 or cvpn_darwin_amd64 があることを確認
+cvpn があることを確認
 
 $ CVPN_PATH=$HOME/cvpn/bin
 $ mkdir -p $CVPN_PATH
-$ cp cvpn_linux_amd64 $CVPN_PATH # (mac: cp cvpn_darwin_amd64 $HOME/cvpn/bin/cvpn)
+$ cp cvpn $CVPN_PATH
 $ echo 'export PATH=$PATH:$CVPN_PATH' >> $HOME/.profile
 $ source $HOME/.profile
 $ cvpn
