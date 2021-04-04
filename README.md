@@ -123,7 +123,7 @@ $ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 
 #### Upload
 
-`cvpn upload` コマンドは `{source_file_path}` ファイルを `{dst_path}` 上にアップロードします。 
+`cvpn upload` コマンドは `{source_file_path}` ファイルを `{dst_path}` 上にアップロードします。
 
 ```console
 $ cvpn upload {source_file_path} {dst_path} -v {volume}
@@ -135,6 +135,25 @@ $ cvpn upload text.txt /cs200xx -v fs/2020
 - Options
   
   - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+
+#### Find
+
+`cvpn find` コマンドは `{path}` ディレクトリを元にして検索を行います。
+
+```console
+$ cvpn find {path} -v {volume} -name {name_pattern} -path {path_pattern}
+
+example
+$ cvpn find /cs200xx -v fs/2020 -name hogehoge
+```
+
+- Options
+  
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+
+  - `-name {name_pattern}`: 検索するディレクトリ or ファイルの **名前** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
+
+  - `-path {path_pattern}`: 検索するディレクトリ or ファイルの **パス** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
 
 ### Development
 
