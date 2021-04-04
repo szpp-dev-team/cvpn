@@ -1,6 +1,7 @@
 package subcmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -13,25 +14,22 @@ func NewListCmd() *cobra.Command {
 	var (
 		volumeName  string
 		showPathFlg bool
+		jsonFlg     bool
 	)
 
 	cmd := &cobra.Command{
-		Use: "list",
-
+		Use:     "list",
 		Aliases: []string{"ls"},
 		Short:   "list files and directorys from path",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			config, err := config.LoadConfig()
 			if err != nil {
 				return err
 			}
-
 			client := api.NewClient()
 			if err := client.LoadCookiesOrLogin(config.Username, config.Password); err != nil {
 				return err
 			}
-
 			volumeID, err := api.GetVolumeIDFromName(volumeName)
 			if err != nil {
 				return err
@@ -42,7 +40,7 @@ func NewListCmd() *cobra.Command {
 				return err
 			}
 
-			printSegmentInfos(segInfos, showPathFlg)
+			printSegmentInfos(segInfos, showPathFlg, jsonFlg)
 
 			return nil
 		},
@@ -57,11 +55,17 @@ func NewListCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&volumeName, "volume", "v", api.VolumeNameFSShare, "volume id [fsshare / fs]")
 	cmd.Flags().BoolVar(&showPathFlg, "path", false, "show segment's path")
+	cmd.Flags().BoolVar(&jsonFlg, "json", false, "show segments with json format")
 
 	return cmd
 }
 
-func printSegmentInfos(segInfos []*api.SegmentInfo, showPathFlg bool) {
+func printSegmentInfos(segInfos []*api.SegmentInfo, showPathFlg, jsonFlg bool) {
+	if jsonFlg {
+		json, _ := json.Marshal(segInfos)
+		fmt.Println(string(json))
+	}
+
 	for _, segInfo := range segInfos {
 		if showPathFlg {
 			if segInfo.IsFile {
