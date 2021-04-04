@@ -85,7 +85,7 @@ password >> your_password
 `cvpn ls` コマンドは指定した `{dir_path}` 上のファイルとディレクトリを一覧表示します。  
 
 ```console
-$ cvpn ls {dir_path} -v {volume} --path
+$ cvpn ls {dir_path} -v {volume} --path --json
 
 example
 $ cvpn ls /report -v fsshare
@@ -101,6 +101,8 @@ $ cvpn ls /report -v fsshare
   - `--path`: ファイル or ディレクトリのパスを表示します。  
   
   - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+
+  - `--json`: json 形式で表示します。
 
 > Note: volume は FSShare や FS などのことを示します。
 
