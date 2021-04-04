@@ -1,34 +1,47 @@
-// list api
-
 package api
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-//フィールドも先頭一文字が大文字かどうかで public かどうかが決まる
 type SegmentInfo struct {
-	Name      string // ファイル or ディレクトリ の名前
-	Path      string // ファイルならダウンロード URL、ディレクトリなら移動先の URL
-	IsFile    bool   // 良いデザインパターンがあるはずなのであったらそれを採用してください
-	IsDir     bool
-	Size      float64 // サイズ
-	Unit      string  // サイズの単位
-	UpdatedAt string  // できれば日時の構造体を使って欲しい
+	Name      string  `json:"name"`    // ファイル or ディレクトリ の名前
+	Path      string  `json:"path"`    // ファイルならダウンロード URL、ディレクトリなら移動先の URL
+	IsFile    bool    `json:"is_file"` // file であるか
+	IsDir     bool    `json:"is_dir"`  // dir であるか
+	Size      float64 `json:"size"`    // サイズ
+	Unit      string  `json:"unit"`    // サイズの単位
+	VolumeID  string  `json:"volume_id"`
+	UpdatedAt string  `json:"updated_at"` // できれば日時の構造体を使って欲しい
 }
 
 // セグメント情報の構造体のスライスを返す
-func (c *Client) List(path string) ([]SegmentInfo, error) {
+func (c *Client) List(path, volumeID string) ([]*SegmentInfo, error) {
+	const ListEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wfb.cgi"
+
+	escapedPath := url.QueryEscape(path)
+	escapedPath = strings.Replace(escapedPath, "/", "\\", -1)
+
+	params := fmt.Sprintf(
+		"?t=p&v=%s&si=0&ri=0&pi=0&sb=%s&so=%s&dir=%s",
+		volumeID,
+		"name",
+		"asc",
+		escapedPath,
+	)
+
 	req, err := http.NewRequest(
 		http.MethodGet,
-		// TODO: ここを path にする
-		"https://vpn.inf.shizuoka.ac.jp/dana/fb/smb/wfb.cgi?t=p&v=resource_1423533946.487706.3&si=0&ri=0&pi=0&sb=name&so=asc&dir=report",
+		ListEndpoint+params,
 		nil,
 	)
 	if err != nil {
@@ -41,11 +54,12 @@ func (c *Client) List(path string) ([]SegmentInfo, error) {
 	}
 	defer resp.Body.Close() // List() が終わる時に実行する
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("not 200")
+		return nil, fmt.Errorf("not 200 but %d", resp.StatusCode)
 	}
 
-	// resp.Body は html
-	segmentInfos, err := getSegmentInfos(resp.Body)
+	// TODO: ディレクトリが見つからなった時の処理
+
+	segmentInfos, err := getSegmentInfos(resp.Body, path)
 	if err != nil {
 		return nil, err
 	}
@@ -53,10 +67,8 @@ func (c *Client) List(path string) ([]SegmentInfo, error) {
 	return segmentInfos, nil
 }
 
-// func関数名(引数) (戻り値) {}
-//戻り値は2つ以上なら () をつける
-func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
-	var segmentInfos []SegmentInfo
+func getSegmentInfos(body io.ReadCloser, dirPath string) ([]*SegmentInfo, error) {
+	var segmentInfos []*SegmentInfo
 
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
@@ -68,17 +80,22 @@ func getSegmentInfos(body io.ReadCloser) ([]SegmentInfo, error) {
 		return nil, err
 	}
 
-	// ここで lines からファイル名とかサイズとかを抜きとり、SegmentInfo のスライスで返す
+	for _, segmentInfo := range segmentInfos {
+		s := path.Join(dirPath, segmentInfo.Name)
+		segmentInfo.Path = s
+	}
 
 	return segmentInfos, nil
 }
 
-// "d(...)" とか "f(...)"とかの形式で返す
-func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
-	var segmentInfos []SegmentInfo
+func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
+	var segmentInfos []*SegmentInfo
 
-	//要素をたどっていく
 	selection := doc.Find("table#table_wfb_5 > tbody > script")
+
+	if selection.Length() == 0 {
+		return nil, errors.New("Maybe you failed to write directory's name, or this directory hasn't data!!!")
+	}
 
 	lines := strings.Split(selection.Text()[1:], ";\n")
 
@@ -89,16 +106,13 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 
 		tokens := strings.Split(line[2:len(line)-1], ",")
 
-		var tokensSeg SegmentInfo
+		var tokensSeg *SegmentInfo
 
 		if len(tokens) == 3 { //ディレクトリの場合は要素数が3
-			tokensSeg = SegmentInfo{
+			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
-				Path:      tokens[1][1 : len(tokens[1])-1],
-				IsFile:    false,
 				IsDir:     true,
 				Size:      -1,
-				Unit:      "",
 				UpdatedAt: tokens[2][1 : len(tokens[2])-1],
 			}
 		}
@@ -112,13 +126,11 @@ func findSegmentLines(doc *goquery.Document) ([]SegmentInfo, error) {
 			if sizeItem[1][len(sizeItem[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
 				sizeUnit = sizeItem[1][len(sizeItem[1])-2:]
 			} else { //そうじゃない場合はbytes
-				sizeUnit = sizeItem[1][len(sizeItem[1])-5:]
+				sizeUnit = "B"
 			}
-			tokensSeg = SegmentInfo{
+			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
-				Path:      tokens[1][1 : len(tokens[1])-1],
 				IsFile:    true,
-				IsDir:     false,
 				Size:      sizeValue,
 				Unit:      sizeUnit,
 				UpdatedAt: tokens[3][1 : len(tokens[3])-1],

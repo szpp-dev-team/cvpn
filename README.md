@@ -1,40 +1,149 @@
 # cvpn-go
-## Development
-### 実行方法など
-1. `.env` に認証情報を入力する。入力処理が完成したらこれは削除して ok  
+
+ `cvpn` は静岡大学情報学部 VPN サービスのコマンドラインアプリケーションです。VPN サービスをコマンドラインを通じて利用することができます。
+
+## Documentation
+
+### Installation
+
+インストール方法は以下の2種類があります。推奨する方法は `go install` です。
+
+- `go install` によるビルド & インストール 【推奨】
+- release ページからビルド済みバイナリをダウンロード
+
+#### インストール方法A: go get 【推奨】
+
+1. go 言語のコンパイラを [ここ](https://golang.org/doc/install) からインストールする
+
+2. パスを通す
+
 ```console
-$ echo '
-SVPN_USERNAME=your_username
-SVPN_PASSWORD=your_password' > .env
-```
-2. 実行する
-```console
-$ go run ./cmd/cvpn/main.go
+# linux
+$ echo 'export PATH="$PATH:$HOME/go/bin"' >> $HOME/.profile
+
+# mac
+$ echo 'export PATH="$HOME/go/bin:$PATH"' >> $HOME/.profile
 ```
 
-### 開発環境
-　docker のおかげで go のインストールも vscode の拡張機能のインストールもしないで開発環境を一発で作ることができます。  
-　docker のありがたみを知る & 原因不明のバグ等を防ぐため、原則としてこのコンテナ上で開発してください。  
-1. VScode の拡張機能 `Remote Development` をインストールする。  
-2. `cvpn-go/` ディレクトリを VScode で開き、左下の青いボタンをクリックし、`Remote-Containers: Reopen in Container` を選択する。※ここで環境がホストからコンテナ上に切り替わるので注意。  
-3. コマンドパレットを開いて `Go: Install/Update Tools` と入力して、全てのツールをチェックしてインストールする。    
-4. (任意) git の ssh 設定？
+3. cvpn をインストール
 
-### ディレクトリ構成
 ```console
-cmd/
-  └ cvpn
-      └ main.go     # エントリーポイント(main 関数だけ)
+$ go install github.com/Shizuoka-Univ-dev/cvpn/cmd/cvpn@latest
+$ source $HOME/.profile
+$ cvpn
+cvpn is a tool which makes you happy
+.
+.
+```
+
+#### インストール方法B: ビルド済みバイナリのダウンロード
+
+1. [release ページ](https://github.com/szpp-dev-team/cvpn/releases) から適切なファイルをダウンロードし、展開してください。  
+
+2. バイナリファイルを任意のディレクトリに置いて `PATH` を設定してください。推奨のディレクトリのパスは `CVPN_PATH=$HOME/cvpn/bin` です。  
+以下に設定手順の例を示します。
+
+##### Windows
+
+TODO
+
+##### Linux & MacOS
+
+```console
+$ cd バイナリファイルをダウンロードしたディレクトリ
+$ ls
+cvpn があることを確認
+
+$ CVPN_PATH=$HOME/cvpn/bin
+$ mkdir -p $CVPN_PATH
+$ cp cvpn $CVPN_PATH
+$ echo 'export PATH=$PATH:$CVPN_PATH' >> $HOME/.profile
+$ source $HOME/.profile
+$ cvpn
+cvpn is a tool which makes you happy
+.
+.
+```
+
+### Usage
+
+> Note: パスやオプションの指定が `{...}` となっていますが、このとき `{}` をつけて入力する必要はありません。
+
+　一番最初に `login` を行ってください。`login` ではユーザー ID とパスワードを各 OS の設定ディレクトリ上に保存します。  
+また、途中で作成を確認するメッセージが表示されますが、設定ファイルの作成を許可する場合は `y`, 許可しない場合は `n` を入力してください。
+
+```console
+$ cvpn login
+username >> cs200xx
+password >> your_password
+.
+.
+```
+
+#### List
+
+`cvpn ls` コマンドは指定した `{dir_path}` 上のファイルとディレクトリを一覧表示します。  
+
+```console
+$ cvpn ls {dir_path} -v {volume} --path
+
+example
+$ cvpn ls /report -v fsshare
+.
+.
+```
+
+絵文字を使用したりしているため、ターミナルのフォントを [Nerd Font](https://www.nerdfonts.com/) にすることを推奨します。  
+推奨フォントは [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip) です。
+
+- Options
   
-api/
-  ├ common.go       # api の共通部分(構造体とかリクエストとか)
-  ├ auth.go         # auth api
-  ├ download.go     # download api
-  └ list.go         # list api
+  - `--path`: ファイル or ディレクトリのパスを表示します。  
+  
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
-pkg/
-  ├ config/         # config 関係
-  |   └ config.go   
-  └ util/           # ユーティリティ(入力とか)
-      └ input.go
+> Note: volume は FSShare や FS などのことを示します。
+
+#### Download
+
+`cvpn download` コマンドは指定した `{target_file_path}` をダウンロードします。
+
+```console
+$ cvpn download {target_file_path} -o {save_path} -v {volume}
+
+example
+$ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
+```
+
+- Options
+
+  - `-o {save_path}`: ダウンロードしたファイルの保存先を指定します。**必ずディレクトリのパスを指定してください**(仕様変更予定)
+  
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+
+#### Upload
+
+`cvpn upload` コマンドは `{source_file_path}` ファイルを `{dst_path}` 上にアップロードします。 
+
+```console
+$ cvpn upload {source_file_path} {dst_path} -v {volume}
+
+example
+$ cvpn upload text.txt /cs200xx -v fs/2020
+```
+
+- Options
+  
+  - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
+
+### Development
+
+開発者向けの内容です。
+
+#### Build
+
+```console
+$ make windows
+$ make linux
+$ make darwin
 ```
