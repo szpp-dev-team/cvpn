@@ -23,6 +23,7 @@ func NewRootCmd() *cobra.Command {
 		NewLoginCmd(),
 		NewListCmd(),
 		NewDownloadCmd(),
+		NewFindCmd(),
 	)
 
 	return cmd
