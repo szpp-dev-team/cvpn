@@ -35,13 +35,16 @@ func NewFindCmd() *cobra.Command {
 				return err
 			}
 
-			matchedPathes, err := searchMatches(client, args[0], volumeID)
+			_, err = searchMatches(
+				client,
+				args[0],
+				volumeID,
+				func(s string) {
+					fmt.Println(s)
+				},
+			)
 			if err != nil {
 				return err
-			}
-
-			for _, path := range matchedPathes {
-				fmt.Println(path)
 			}
 
 			return nil
@@ -67,7 +70,7 @@ func checkRegexp(pattern, s string) (bool, error) {
 	return regexp.Match(pattern, []byte(s))
 }
 
-func searchMatches(client *api.Client, begin, volumeID string) ([]string, error) {
+func searchMatches(client *api.Client, begin, volumeID string, matchHandler func(string)) ([]string, error) {
 	var stack, matchedPathes []string
 	stack = append(stack, begin)
 	for len(stack) > 0 {
@@ -88,6 +91,7 @@ func searchMatches(client *api.Client, begin, volumeID string) ([]string, error)
 				return nil, err
 			}
 			if ok1 && ok2 {
+				matchHandler(seg.Path)
 				matchedPathes = append(matchedPathes, seg.Path)
 			}
 			if seg.IsDir && recursiveFlg {
