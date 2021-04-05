@@ -48,7 +48,7 @@ func NewFindCmd() *cobra.Command {
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.New("path was not set")
+				return errors.New("{starting-directory} was not set")
 			}
 
 			return nil
