@@ -138,10 +138,10 @@ $ cvpn upload text.txt /cs200xx -v fs/2020
 
 #### Find
 
-`cvpn find` コマンドは `{path}` ディレクトリを元にして検索を行います。
+`cvpn find` コマンドは `{starting-directory}` ディレクトリを元にして検索を行います。
 
 ```console
-$ cvpn find {path} -v {volume} -name {name_pattern} -path {path_pattern} -r
+$ cvpn find {starting-directory} -v {volume} -name {name_pattern} -path {path_pattern} -r
 
 example
 $ cvpn find /cs200xx -v fs/2020 -name hogehoge
