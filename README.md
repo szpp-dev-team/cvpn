@@ -157,6 +157,15 @@ $ cvpn find /cs200xx -v fs/2020 -name hogehoge
 
   - `--path {path_pattern}`: 検索するディレクトリ or ファイルの **パス** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
 
+> Note:  
+> **名前** は **パス** のうち末尾の部分を指します。
+> 例えば、`/class/english/hoge.pdf` において、名前とパスは以下のようになります。
+
+|k|v|
+|----|----|
+|名前|`hoge.pdf`|
+|パス|`/class/english/hoge.pdf`|
+
 ### Development
 
 開発者向けの内容です。
