@@ -64,6 +64,7 @@ func printSegmentInfos(segInfos []*api.SegmentInfo, showPathFlg, jsonFlg bool) {
 	if jsonFlg {
 		json, _ := json.Marshal(segInfos)
 		fmt.Println(string(json))
+		return
 	}
 
 	for _, segInfo := range segInfos {
