@@ -141,7 +141,7 @@ $ cvpn upload text.txt /cs200xx -v fs/2020
 `cvpn find` コマンドは `{path}` ディレクトリを元にして検索を行います。
 
 ```console
-$ cvpn find {path} -v {volume} -name {name_pattern} -path {path_pattern}
+$ cvpn find {path} -v {volume} -name {name_pattern} -path {path_pattern} -r
 
 example
 $ cvpn find /cs200xx -v fs/2020 -name hogehoge
@@ -151,9 +151,11 @@ $ cvpn find /cs200xx -v fs/2020 -name hogehoge
   
   - `-v {volume}`: 参照するファイルが存在するボリュームを指定します(`fsshare`, `fs/{dir}`)。デフォルト値は `fsshare` です。
 
-  - `-name {name_pattern}`: 検索するディレクトリ or ファイルの **名前** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
+  - `-r`, `--recursive`: 再帰的にファイルを探索します。
 
-  - `-path {path_pattern}`: 検索するディレクトリ or ファイルの **パス** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
+  - `--name {name_pattern}`: 検索するディレクトリ or ファイルの **名前** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
+
+  - `--path {path_pattern}`: 検索するディレクトリ or ファイルの **パス** のパターンを指定します。[正規表現](https://github.com/google/re2/wiki/Syntax)が使用可能です。
 
 ### Development
 
