@@ -20,7 +20,7 @@ var (
 func NewFindCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "find",
-		Short: "find files or directories which matched pattern",
+		Short: "find files or directories which matches pattern",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			config, err := config.LoadConfig()
 			if err != nil {
