@@ -77,7 +77,13 @@ func searchMatches(client *api.Client, begin, volumeID string, matchHandler func
 		tail := len(stack) - 1
 		segs, err := client.List(stack[tail], volumeID)
 		if err != nil {
-			return nil, err
+			if api.IsPermissionDenied(err) {
+				fmt.Printf("cannot fetch directory '%s': Permission denied\n", stack[tail])
+				stack = stack[:tail]
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		stack = stack[:tail]
 

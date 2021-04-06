@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
 	"github.com/Shizuoka-Univ-dev/cvpn/pkg/config"
@@ -37,6 +38,10 @@ func NewListCmd() *cobra.Command {
 
 			segInfos, err := client.List(args[0], volumeID)
 			if err != nil {
+				if api.IsPermissionDenied(err) {
+					fmt.Fprintf(os.Stderr, "cannot fetch directory '%s': Permission denied", args[0])
+					return nil
+				}
 				return err
 			}
 
