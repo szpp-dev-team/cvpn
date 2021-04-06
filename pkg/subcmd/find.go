@@ -3,6 +3,7 @@ package subcmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
@@ -78,7 +79,7 @@ func searchMatches(client *api.Client, begin, volumeID string, matchHandler func
 		segs, err := client.List(stack[tail], volumeID)
 		if err != nil {
 			if api.IsPermissionDenied(err) {
-				fmt.Printf("cannot fetch directory '%s': Permission denied\n", stack[tail])
+				fmt.Fprintf(os.Stderr, "cannot fetch directory '%s': Permission denied\n", stack[tail])
 				stack = stack[:tail]
 				continue
 			} else {
