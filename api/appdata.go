@@ -3,7 +3,6 @@ package api
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"path"
 )
@@ -62,7 +61,7 @@ func saveCookies(cookies []string) error {
 	for _, cookie := range cookies {
 		fmt.Fprintln(fp, cookie)
 	}
-	log.Printf("saveCookies(): Saved %d lines of cookie into %q.\n", len(cookies), cookieFilePath)
+	logger.Printf("saveCookies(): Saved %d lines of cookie into %q.\n", len(cookies), cookieFilePath)
 	return nil
 }
 
@@ -86,7 +85,7 @@ func loadCookies() ([]string, error) {
 		cookies = append(cookies, cookie)
 	}
 
-	log.Printf("loadCookies(): Loaded %d lines of cookie.\n", len(cookies))
+	logger.Printf("loadCookies(): Loaded %d lines of cookie.\n", len(cookies))
 	return cookies, nil
 }
 
@@ -95,6 +94,6 @@ func deleteCookieFile() error {
 	if err != nil {
 		return err
 	}
-	log.Println("deleteCookieFile(): delete.")
+	logger.Printf("deleteCookieFile(): delete.")
 	return os.Remove(cookieFilePath)
 }

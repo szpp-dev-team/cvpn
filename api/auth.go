@@ -4,7 +4,6 @@ package api
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -103,7 +102,7 @@ func (c *Client) getAuthParams() (url.Values, error) {
 func (c *Client) LoadCookiesOrLogin(username, password string) error {
 	cookies, err := loadCookies()
 	if err != nil || len(cookies) == 0 {
-		log.Println("LoadCookiesOrLogin(): Trying login due to no cookie.")
+		logger.Printf("LoadCookiesOrLogin(): Trying login due to no cookie.")
 		return c.Login(username, password)
 	}
 	c.cookies = cookies
@@ -112,13 +111,13 @@ func (c *Client) LoadCookiesOrLogin(username, password string) error {
 	authParams, err := c.getAuthParams()
 	if err == nil {
 		c.authParams = authParams
-		log.Println("LoadCookiesOrLogin(): Succeeded getAuthparams() with saved cookie.")
+		logger.Printf("LoadCookiesOrLogin(): Succeeded getAuthparams() with saved cookie.")
 		return nil
 	}
 
 	switch err.(type) {
 	case *ErrRedirectedToLogin:
-		log.Println("LoadCookiesOrLogin(): Trying login due to invalid cookie.")
+		logger.Printf("LoadCookiesOrLogin(): Trying login due to invalid cookie.")
 		return c.Login(username, password)
 	default:
 		return err

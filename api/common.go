@@ -3,8 +3,10 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,6 +19,11 @@ const (
 	VpnIndexURL = "https://vpn.inf.shizuoka.ac.jp/dana/home/index.cgi"
 )
 
+var (
+	logger *log.Logger
+	buffer bytes.Buffer
+)
+
 type Client struct {
 	client     *http.Client
 	cookies    []string
@@ -26,6 +33,8 @@ type Client struct {
 func NewClient() *Client {
 	client := new(http.Client)
 
+	logger = log.New(&buffer, "[CVPN-API]", log.Default().Flags())
+
 	// redirect をしない
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
@@ -34,6 +43,10 @@ func NewClient() *Client {
 	return &Client{
 		client: client,
 	}
+}
+
+func ReadLog() []byte {
+	return buffer.Bytes()
 }
 
 // 認証情報を含めたリクエストを送る。
