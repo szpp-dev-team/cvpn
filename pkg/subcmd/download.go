@@ -2,6 +2,7 @@ package subcmd
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
 	"github.com/Shizuoka-Univ-dev/cvpn/pkg/config"
@@ -33,8 +34,11 @@ func NewDownloadCmd() *cobra.Command {
 				return err
 			}
 
-			if err := client.Download(args[0], savePath, volumeID); err != nil {
-				return err
+			pathes := strings.Split(args[0], "\n")
+			for _, path := range pathes {
+				if err := client.Download(path, savePath, volumeID); err != nil {
+					return err
+				}
 			}
 
 			return nil
