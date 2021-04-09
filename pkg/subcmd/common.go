@@ -14,6 +14,9 @@ func Execute() {
 	cmd.SetOutput(os.Stdout)
 
 	if err := cmd.Execute(); err != nil {
+		if err := saveLogs(); err != nil {
+			log.Fatal(err)
+		}
 		cmd.SetOutput(os.Stderr)
 		cmd.Println(err)
 		os.Exit(1)
