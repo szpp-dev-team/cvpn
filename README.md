@@ -168,6 +168,11 @@ $ cvpn find /cs200xx -v fs/2020 -name hogehoge
 |名前|`hoge.pdf`|
 |パス|`/class/english/hoge.pdf`|
 
+### Log
+
+ログは `$USER_CACHE_DIR/cvpn/log/` 配下に保存されます。  
+`$USER_CACHE_DIR` は OS によって異なるので、詳しい内容は https://golang.org/pkg/os/#UserCacheDir を参照してください。
+
 ### Development
 
 開発者向けの内容です。
