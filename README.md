@@ -168,6 +168,32 @@ $ cvpn find /cs200xx -v fs/2020 -name hogehoge
 |名前|`hoge.pdf`|
 |パス|`/class/english/hoge.pdf`|
 
+#### Completion
+
+ `cvpn find {bash/zsh}` コマンドはシェルの tab 補完のスクリプトを出力します。  
+
+```console
+$ cvpn completion {bash/zsh}
+
+example
+$ uname -a
+Darwin ...
+$ echo $SHELL
+/opt/homebrew/bin/bash
+$ cvpn completion bash > /usr/local/etc/bash_completion.d/cvpn
+```
+
+tab 補完を有効にするには、出力されたスクリプトを以下のディレクトリに `cvpn` という名前で保存してください。
+
+**bash**
+
+- Linux: `/etc/bash_completion.d/`
+- MacOS: `/usr/local/etc/bash_completion.d/`
+
+**zsh**
+
+TODO
+
 ### Log
 
 ログは `$USER_CACHE_DIR/cvpn/log/` 配下に保存されます。  
