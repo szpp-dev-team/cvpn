@@ -2,10 +2,10 @@ package subcmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/Shizuoka-Univ-dev/cvpn/static"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ func newBashCompletionCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "bash",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, err := ReadCompletion("bash")
+			b, err := BashCompletion()
 			if err != nil {
 				return err
 			}
@@ -49,19 +49,13 @@ func IndexFilePath() (string, error) {
 	return indexFilePath, nil
 }
 
-func ReadCompletion(shell string) (string, error) {
-	completionPath := filepath.Join("completion", shell, "cvpn")
-	b, err := ioutil.ReadFile(completionPath)
-	if err != nil {
-		return "", err
-	}
-
+func BashCompletion() (string, error) {
 	indexFilePath, err := IndexFilePath()
 	if err != nil {
 		return "", err
 	}
 
-	completion := fmt.Sprintf(string(b), indexFilePath)
+	completion := fmt.Sprintf(string(static.BashCompletionBytes), indexFilePath)
 
 	return completion, nil
 }
