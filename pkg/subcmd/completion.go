@@ -49,7 +49,19 @@ func IndexFilePath() (string, error) {
 	return indexFilePath, nil
 }
 
-func ReadCompletion(shell string) ([]byte, error) {
+func ReadCompletion(shell string) (string, error) {
 	completionPath := filepath.Join("completion", shell, "cvpn")
-	return ioutil.ReadFile(completionPath)
+	b, err := ioutil.ReadFile(completionPath)
+	if err != nil {
+		return "", err
+	}
+
+	indexFilePath, err := IndexFilePath()
+	if err != nil {
+		return "", err
+	}
+
+	completion := fmt.Sprintf(string(b), indexFilePath)
+
+	return completion, nil
 }
