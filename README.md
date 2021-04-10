@@ -185,12 +185,16 @@ $ cvpn completion bash > /usr/local/etc/bash_completion.d/cvpn
 
 tab 補完を有効にするには、出力されたスクリプトを以下のディレクトリに `cvpn` という名前で保存してください。
 
-**bash**
+**Bash**
 
 - Linux: `/etc/bash_completion.d/`
 - MacOS: `/usr/local/etc/bash_completion.d/`
 
-**zsh**
+**Zsh**
+
+TODO
+
+**PowerShell**
 
 TODO
 
