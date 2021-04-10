@@ -3,10 +3,10 @@ package subcmd
 import (
 	"errors"
 	"fmt"
-	"regexp"
 
 	"github.com/Shizuoka-Univ-dev/cvpn/api"
 	"github.com/Shizuoka-Univ-dev/cvpn/pkg/config"
+	"github.com/Shizuoka-Univ-dev/cvpn/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -66,10 +66,6 @@ func NewFindCmd() *cobra.Command {
 	return cmd
 }
 
-func checkRegexp(pattern, s string) (bool, error) {
-	return regexp.Match(pattern, []byte(s))
-}
-
 func searchMatches(client *api.Client, begin, volumeID string, matchHandler func(string)) ([]string, error) {
 	var stack, matchedPathes []string
 	stack = append(stack, begin)
@@ -82,11 +78,11 @@ func searchMatches(client *api.Client, begin, volumeID string, matchHandler func
 		stack = stack[:tail]
 
 		for _, seg := range segs {
-			ok1, err := checkRegexp(namePattern, seg.Name)
+			ok1, err := util.CheckRegexp(namePattern, seg.Name)
 			if err != nil {
 				return nil, err
 			}
-			ok2, err := checkRegexp(pathPattern, seg.Path)
+			ok2, err := util.CheckRegexp(pathPattern, seg.Path)
 			if err != nil {
 				return nil, err
 			}
