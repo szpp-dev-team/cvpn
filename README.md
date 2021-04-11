@@ -192,7 +192,22 @@ tab 補完を有効にするには、出力されたスクリプトを以下の�
 
 **Zsh**
 
-TODO
+まず、.zshrc で以下のような autocompletion 設定を記述してください。
+すでに記述済みの場合はそのままでOKです。
+```zsh
+autoload -Uz compinit && compinit
+```
+
+次に、適当なディレクトリ X に `cvpn completion zsh` の出力結果を `_cvpn` というファイル名で保存してください。
+そのあと、zsh の環境変数 `fpath` にディレクトリ X を追加してください。
+
+設定例:
+```console
+$ zsh_comp_dir=~/.zsh/completions
+$ mkdir -p $zsh_comp_dir
+$ cvpn completion zsh > $zsh_comp_dir/_cvpn
+$ echo 'fpath=($zsh_comp_dir $fpath)' >> ~/.zshrc
+```
 
 **PowerShell**
 
