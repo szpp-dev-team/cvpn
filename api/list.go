@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -115,7 +116,6 @@ func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
 	var segmentInfos []*SegmentInfo
 
 	selection := doc.Find("table#table_wfb_5 > tbody > script")
-
 	if selection.Length() == 0 {
 		return nil, errors.New("Maybe you failed to write directory's name, or this directory hasn't data!!!")
 	}
@@ -127,10 +127,12 @@ func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
 			break
 		}
 
-		tokens := strings.Split(line[2:len(line)-1], ",")
+		tokens, err := splitSegmentLine(line[2 : len(line)-1])
+		if err != nil {
+			return nil, err
+		}
 
 		var tokensSeg *SegmentInfo
-
 		if len(tokens) == 3 { //ディレクトリの場合は要素数が3
 			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
@@ -138,19 +140,10 @@ func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
 				Size:      -1,
 				UpdatedAt: tokens[2][1 : len(tokens[2])-1],
 			}
-		}
-		if len(tokens) == 4 { //ファイルの場合は要素数が4
+		} else if len(tokens) == 4 { //ファイルの場合は要素数が4
 			sizeItem := strings.Split(tokens[2][1:len(tokens[2])-1], "&")
-			sizeValue, err := strconv.ParseFloat(sizeItem[0], 64)
-			if err != nil {
-				return nil, err
-			}
-			var sizeUnit string
-			if sizeItem[1][len(sizeItem[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
-				sizeUnit = sizeItem[1][len(sizeItem[1])-2:]
-			} else { //そうじゃない場合はbytes
-				sizeUnit = "B"
-			}
+			sizeValue, sizeUnit := fileSize(sizeItem)
+
 			tokensSeg = &SegmentInfo{
 				Name:      tokens[0][1 : len(tokens[0])-1],
 				IsFile:    true,
@@ -164,4 +157,37 @@ func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
 	}
 
 	return segmentInfos, nil
+}
+
+func fileSize(sizeItem []string) (float64, string) {
+	sizeValue, err := strconv.ParseFloat(sizeItem[0], 64)
+	if err != nil {
+		return 0, ""
+	}
+
+	var sizeUnit string
+	if sizeItem[1][len(sizeItem[1])-1] == 'B' { //最後がBとなっている場合はbytes以外
+		sizeUnit = sizeItem[1][len(sizeItem[1])-2:]
+	} else { //そうじゃない場合はbytes
+		sizeUnit = "B"
+	}
+
+	return sizeValue, sizeUnit
+}
+
+func splitSegmentLine(line string) ([]string, error) {
+	r, err := regexp.Compile(`[^\s"']+|"([^"]*)"|'([^']*)`)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens := r.FindAllString(line, -1)
+	var ans []string
+	for _, token := range tokens {
+		if token != "," {
+			ans = append(ans, token)
+		}
+	}
+
+	return ans, nil
 }
