@@ -117,6 +117,12 @@ example
 $ cvpn download /cs200xx/I_am_file.txt -o ./univ -v fs/2020
 ```
 
+また、`find` サブコマンドと併用することで、複数ダウンロードを行うことができます。
+
+```console
+$ cvpn download "$(cvpn find {target_dir})"
+```
+
 - Options
 
   - `-o {save_path}`: ダウンロードしたファイルの保存先を指定します。**必ずディレクトリのパスを指定してください**(仕様変更予定)
