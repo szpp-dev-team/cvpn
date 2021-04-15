@@ -1,9 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -21,7 +22,16 @@ type SegmentInfo struct {
 	Size      float64 `json:"size"`    // サイズ
 	Unit      string  `json:"unit"`    // サイズの単位
 	VolumeID  string  `json:"volume_id"`
-	UpdatedAt string  `json:"updated_at"` // できれば日時の構造体を使って欲しい
+	UpdatedAt string  `json:"updated_at"` // TODO: できれば日時の構造体を使って欲しい
+}
+
+type PermissionError struct {
+	RequestPath string
+	VolumeID    string
+}
+
+func (pe *PermissionError) Error() string {
+	return "Perrmission Denied"
 }
 
 // セグメント情報の構造体のスライスを返す
@@ -52,14 +62,18 @@ func (c *Client) List(path, volumeID string) ([]*SegmentInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close() // List() が終わる時に実行する
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("not 200 but %d", resp.StatusCode)
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == http.StatusFound { // permission denied
+		return nil, &PermissionError{RequestPath: path, VolumeID: volumeID}
+	} else if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("StatusCode of file uploading was %d (expected: 200 OK)", resp.StatusCode)
 	}
 
-	// TODO: ディレクトリが見つからなった時の処理
-
-	segmentInfos, err := getSegmentInfos(resp.Body, path)
+	segmentInfos, err := getSegmentInfos(b, path)
 	if err != nil {
 		return nil, err
 	}
@@ -67,10 +81,19 @@ func (c *Client) List(path, volumeID string) ([]*SegmentInfo, error) {
 	return segmentInfos, nil
 }
 
-func getSegmentInfos(body io.ReadCloser, dirPath string) ([]*SegmentInfo, error) {
+func IsPermissionDenied(err error) bool {
+	switch err.(type) {
+	case *PermissionError:
+		return true
+	default:
+		return false
+	}
+}
+
+func getSegmentInfos(b []byte, dirPath string) ([]*SegmentInfo, error) {
 	var segmentInfos []*SegmentInfo
 
-	doc, err := goquery.NewDocumentFromReader(body)
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}
