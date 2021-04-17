@@ -52,7 +52,7 @@ func NewDownloadCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&savePath, "output", "o", ".", "a path which saves downloaded file")
+	cmd.Flags().StringVarP(&savePath, "output", "o", ".", "a path for saving downloaded files")
 	cmd.Flags().StringVarP(&volumeName, "volume", "v", api.VolumeNameFSShare, "volume id [fsshare / fs]")
 
 	return cmd

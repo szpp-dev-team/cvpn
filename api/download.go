@@ -74,7 +74,7 @@ func (c *Client) downloadFile(reqURL, fileName, dirPath string, params *url.Valu
 		if bytes.Contains(htmlBytes, []byte(fileNotFoundMessage)) {
 			file.Close()
 			os.Remove(savePath)
-			return fmt.Errorf("File does not found. You may wrong the argument `path` or `volume`.")
+			return fmt.Errorf("The file could not be found. The argument `path` or `volume` may be wrong.")
 		}
 	}
 

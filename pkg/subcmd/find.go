@@ -61,8 +61,8 @@ func NewFindCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&volumeName, "volume", "v", api.VolumeNameFSShare, "volume id [fsshare / fs]")
 	cmd.Flags().BoolVarP(&recursiveFlg, "recursive", "r", false, "recursively search files or directories")
-	cmd.Flags().StringVar(&namePattern, "name", "", "pattern of file or directory name")
-	cmd.Flags().StringVar(&pathPattern, "path", "", "pattern of file or directory's path")
+	cmd.Flags().StringVar(&namePattern, "name", "", "pattern for name of files or directories")
+	cmd.Flags().StringVar(&pathPattern, "path", "", "pattern for path of files or directories")
 
 	return cmd
 }

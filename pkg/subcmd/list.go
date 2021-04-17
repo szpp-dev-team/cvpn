@@ -51,7 +51,7 @@ func NewListCmd() *cobra.Command {
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errors.New("write the path to place that you wnat to see all files and folders")
+				return errors.New("write the path to place that you want to see all files and folders")
 			}
 
 			return nil
@@ -59,8 +59,8 @@ func NewListCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&volumeName, "volume", "v", api.VolumeNameFSShare, "volume id [fsshare / fs]")
-	cmd.Flags().BoolVar(&showPathFlg, "path", false, "show segment's path")
-	cmd.Flags().BoolVar(&jsonFlg, "json", false, "show segments with json format")
+	cmd.Flags().BoolVar(&showPathFlg, "path", false, "show path of segment")
+	cmd.Flags().BoolVar(&jsonFlg, "json", false, "show segments in json format")
 
 	return cmd
 }

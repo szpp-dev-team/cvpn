@@ -45,7 +45,7 @@ func NewLoginCmd() *cobra.Command {
 
 			// ログイン処理
 			if err := client.LoadCookiesOrLogin(username, password); err != nil {
-				fmt.Println("Either the username or password is invalid.")
+				fmt.Println("Either the username or the password is invalid.")
 				log.Fatal(err)
 			}
 			// 生成確認
