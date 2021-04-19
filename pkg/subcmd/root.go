@@ -24,6 +24,7 @@ func NewRootCmd() *cobra.Command {
 		NewListCmd(),
 		NewDownloadCmd(),
 		NewFindCmd(),
+		NewVersionCmd(),
 	)
 
 	return cmd
