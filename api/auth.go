@@ -124,6 +124,25 @@ func (c *Client) LoadCookiesOrLogin(username, password string) error {
 	}
 }
 
+func (c *Client) CheckCookies() bool {
+	cookies, err := loadCookies()
+	if err != nil || len(cookies) == 0 {
+		logger.Printf("LoadCookiesOrLogin(): Trying login due to no cookie.")
+		return false
+	}
+	c.cookies = cookies
+
+	// ファイルから読み込んだクッキーで getAuthparams() が成功したなら return
+	authParams, err := c.getAuthParams()
+	if err == nil {
+		c.authParams = authParams
+		logger.Printf("LoadCookiesOrLogin(): Succeeded getAuthparams() with saved cookie.")
+		return true
+	}
+
+	return false
+}
+
 func (c *Client) Logout() error {
 	const LogoutEndpoint = "https://vpn.inf.shizuoka.ac.jp/dana-na/auth/logout.cgi"
 
