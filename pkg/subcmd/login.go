@@ -20,6 +20,7 @@ func NewLoginCmd() *cobra.Command {
 			cmd.SetOut(os.Stderr)
 
 			client := api.NewClient()
+
 			if ok := client.CheckCookies(); ok {
 				yes, err := util.InputYN("You seem to have already logined. Do you want to login again?[Y/n] ")
 				if err != nil {

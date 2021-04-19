@@ -117,7 +117,7 @@ func findSegmentLines(doc *goquery.Document) ([]*SegmentInfo, error) {
 
 	selection := doc.Find("table#table_wfb_5 > tbody > script")
 	if selection.Length() == 0 {
-		return nil, errors.New("Maybe you failed to write directory's name, or this directory hasn't data!!!")
+		return nil, errors.New("the directory name is wrong, or the directory have no data")
 	}
 
 	lines := strings.Split(selection.Text()[1:], ";\n")
