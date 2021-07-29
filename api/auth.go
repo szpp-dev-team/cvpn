@@ -4,6 +4,7 @@ package api
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -55,7 +56,10 @@ func (c *Client) login(params url.Values) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 
 	c.cookies = getCookies(resp.Header["Set-Cookie"])
 	location := resp.Header.Get("location")
@@ -155,6 +159,10 @@ func (c *Client) Logout() error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 	if resp.StatusCode != http.StatusFound {
 		return errors.New("failed to logout")
 	}
@@ -167,7 +175,10 @@ func (c *Client) Logout() error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 	if resp.StatusCode != http.StatusOK {
 		return errors.New("failed to logout")
 	}
