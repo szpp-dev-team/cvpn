@@ -49,7 +49,10 @@ func (c *Client) downloadFile(reqURL, fileName, dirPath string, params *url.Valu
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("StatusCode of file downloading was %d (expected: 200 OK)", resp.StatusCode)
 	}

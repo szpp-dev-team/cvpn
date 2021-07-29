@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -63,7 +64,10 @@ func (c *Client) List(path, volumeID string) ([]*SegmentInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
